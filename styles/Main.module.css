@@ -20,6 +20,7 @@
 .menu1_settings{
     min-height: calc(100vh - 65px - 20px);
     padding: 10px;
+    position: relative;
 }
 
 .menu1_submit{
@@ -56,11 +57,11 @@
     fill: #f4e19c;
 }
 
-.unavailable_hours{
+.avoid_hours{
     fill: #ff3f29;
     fill-opacity: 0.35;
 }
-.avoid_hours{
+/*.avoid_hours{
     fill: #ff9429;
     fill-opacity: 0.30;
-}
+}*/

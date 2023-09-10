@@ -1,94 +1,21 @@
 
 import Head from "next/head.js";
-import { CUtoModelTime, ModelToCUTime } from "lib/utils.ts";
+import { CUtoModelTime, ModelToCUTime } from "lib/cu_utils.js";
 import { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import styles from "styles/Main.module.css";
 import Image from "next/Image";
+import { preschedule_json } from "lib/json/preschedule.js";
+import { example_schedule } from "lib/json/example_schedule.js";
 
 export default function Index(){
 
     const [page_setup, setPageSetup] = useState(false);
     const [schedule_svg, setScheduleSVG] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [schedule, setSchedule] = useState({
-        classes:[
-            [
-            {
-                csn: "12345",
-                start_time: 800,
-                end_time: 850,
-                days: [0, 2],
-                title: "CSCI 3308",
-                type: "LEC",
-                section: "012",
-            }],
-            [{
-                csn: "43210",
-                start_time: 1115,
-                end_time: 1205,
-                days: [0, 2, 4],
-                title: "CSCI 2824",
-                type: "LEC",
-                section: "014"
-            }],
-            [{
-                csn: "57394",
-                start_time: 1100,
-                end_time: 1215,
-                days: [1, 3],
-                title: "BUSM 1011",
-                type: "LEC",
-                section: "015",
-            }],
-            [
-                {
-                    csn: "23456",
-                    start_time: 905,
-                    end_time: 955,
-                    days: [0, 2, 4],
-                    title: "PHYS 1120",
-                    type: "LEC",
-                    section: "011"
-                },
-                {
-                    csn: "84937",
-                    start_time: 1535,
-                    end_time: 1625,
-                    days: [1],
-                    title: "PHYS 1120",
-                    type: "REC",
-                    section: "123"
-                }
-            ],
-            [
-                {
-                    csn: "59348",
-                    start_time: 800,
-                    end_time: 1030,
-                    days: [1],
-                    title: "PHYS 1140",
-                    type: "LAB",
-                    section: "432"
-                }
-            ],
-            [{
-                csn: "84934",
-                start_time: 1430,
-                end_time: 1520,
-                days: [0, 2, 4],
-                title: "CSCI 3208",
-                type: "LEC",
-                section: "102"
-            }]
-        ],
-        unavailable_hours: [
-            [[60, 72]], [[60, 84]], [], [192, 198], [[60, 70]]
-        ],
-        avoid_hours: [
-            [], [], [], [], [[84, 120]]
-        ],
-    })
+    const [status_message, setStatusText] = useState("Brought to you by a fellow Buff!");
+    const [preschedule, setPreSchedule] = useState(preschedule_json);
+    const [schedule, setSchedule] = useState(example_schedule);
 
     useEffect(() => {
         if (typeof window == "undefined" || page_setup) return;
@@ -123,17 +50,7 @@ export default function Index(){
         return (
             <svg width={width} height={1.2*height}>
 
-                {schedule != null && (<><g className={styles.unavailable_hours}>
-                    {schedule.unavailable_hours.map((hours_list, i) => (<g key={"unavailable-day-" + i}>
-                        {hours_list.map((hour_set, j) => {
-                        if (hour_set.length < 2) return (<g key={"unavailable-" + i + "-" + j}></g>);
-
-                        return (<g key={"unavailable-" + i + "-" + j}>
-                            <rect x={getX(i) + "%"} y={getY(hour_set[0]/12.0) + "%"} height={(getY(hour_set[1]/12.0) - getY(hour_set[0]/12.0)) + "%"} width={(w/5) + "%"}></rect>
-                        </g>)})}
-                    </g>))}
-                </g>
-                <g className={styles.avoid_hours}>
+                {schedule != null && (<><g className={styles.avoid_hours}>
                     {schedule.avoid_hours.map((hours_list, i) => (<g key={"avoid-day-" + i}>
                         {hours_list.map((hour_set, j) => {
                         if (hour_set.length < 2) return (<g key={"avoid-" + i + "-" + j}></g>);
@@ -159,13 +76,13 @@ export default function Index(){
                 <g>
                     {schedule.classes.map((classSet, i) => (<g key={"class-set-" + i}>
                         {classSet.map((cl, j) => (<g key={"class-" + i + "-" + j}>
-                            {cl.days.map(day => {
-                                const x = getX(day) + 0.14, y = getY(CUtoModelTime(cl.start_time)/12.0) + 0.08;
+                            {cl.meeting_times.map(meeting_time => {
+                                const x = getX(meeting_time.day) + 0.14, y = getY(meeting_time.start_time/12.0) + 0.08;
                                 //style={{fill: colors[i % colors.length]}}
-                                return (<g key={"class-" + i + "-" + j + "-day-" + day}>
+                                return (<g key={"class-" + i + "-" + j + "-day-" + meeting_time.day}>
                                 <rect x={x + "%"} y={y + "%"} width={((w/5) - 0.14) + "%"} 
-                                height={(getY(CUtoModelTime(cl.end_time)/12.0) - y) + "%"} 
-                                className={styles["palette-" + (i % 5)]} rx="6" ry="6" key={"class-" + cl.csn + "-day-" + day}></rect>
+                                height={(getY(meeting_time.end_time/12.0) - y) + "%"} 
+                                className={styles["palette-" + (i % 5)]} rx="6" ry="6" key={"class-" + cl.title + "-day-" + meeting_time.day}></rect>
                                 
                                 <g style={{fill: "#FFF"}} fontSize={width > 900 ? "13pt" : "8pt"}>
                                     <text x={(x+0.5) + "%"} y={(y+2.4) + "%"} fontWeight="bold">{cl.title}</text>
@@ -191,13 +108,18 @@ export default function Index(){
         <>
         <Head>
             <link rel="icon" href="/favicon.png"></link>
-            <title>Free CU Boulder Schedule Optimizer | Make the most of your semester</title>
-            <meta name="description" content="Cut down on your walking time and supercharge your sleep schedule with an optimized class schedule! Fit in all of your classes this year."></meta>
+            <title>Free CU Boulder Class Schedule Optimizer | Make the most of your semester</title>
+            <meta name="description" content="Cut down on your walking time and supercharge your sleep schedule with an optimized class schedule! Fit in all of your courses this year."></meta>
         </Head>
         <div className={styles.main_container}>
             <div className={styles.menu1}>
                 <div className={styles.menu1_settings}>
                     Settings
+                    <div style={{position: "absolute", bottom: "10px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
+                        <center>
+                            <span><b>{status_message}</b></span>
+                        </center>
+                    </div>
                 </div>
                 <div className={styles.menu1_submit}>
                     {loading && (<div style={{marginTop: "6px", marginRight: "10px"}}>
