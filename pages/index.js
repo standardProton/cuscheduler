@@ -50,8 +50,8 @@ export default function Index(){
         return (
             <svg width={width} height={1.2*height}>
 
-                {schedule != null && (<><g className={styles.avoid_hours}>
-                    {schedule.avoid_hours.map((hours_list, i) => (<g key={"avoid-day-" + i}>
+                {schedule != null && (<><g className={styles.avoid_times}>
+                    {schedule.avoid_times.map((hours_list, i) => (<g key={"avoid-day-" + i}>
                         {hours_list.map((hour_set, j) => {
                         if (hour_set.length < 2) return (<g key={"avoid-" + i + "-" + j}></g>);
 
@@ -98,10 +98,22 @@ export default function Index(){
         )
     }
 
-    function submit(){
+    async function submit(){
         if (loading) return;
         if (schedule == null || schedule.classes.length == 0) return;
         setLoading(true);
+
+        const res1 = await fetch("/api/optimizer", {
+            method: "POST",
+            body: JSON.stringify({
+                current_schedule: schedule,
+                preschedule,
+                min_enroll_count: 5,
+            })
+        });
+        const res = await res1.json();
+        console.log(res);
+        setLoading(false);
     }
 
     return(
