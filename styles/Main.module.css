@@ -1,0 +1,66 @@
+
+
+.main_container{
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.menu1{
+    min-width: 200px;
+    width: 20%;
+    max-width: 300px;
+    background-color: #2c2c34;
+
+}
+
+.shadow{ /*4, 8, 6, 20*/
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.2), 0 4px 6px 0 rgba(0, 0, 0, 0.19);
+}
+
+.menu1_settings{
+    min-height: calc(100vh - 65px - 20px);
+    padding: 10px;
+}
+
+.menu1_submit{
+    min-height: 45px;
+    padding: 10px;
+    box-shadow: 0px 4px 6px 10px rgba(0, 0, 0, 0.2), 0px 4px 6px 10px rgba(0, 0, 0, 0.19);
+    align-items: right;
+    text-align: right;
+    justify-content: right;
+    display: flex;
+}
+
+.schedule_container{
+    width: 84%;
+    background-color: #1b1b22;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100vh;
+}
+
+.palette-0{
+    fill: #626689
+}
+.palette-1{
+    fill: #6887a5
+}
+.palette-2{
+    fill: #7fb5ad
+}
+.palette-3{
+    fill: #a5cf99;
+}
+.palette-4{
+    fill: #f4e19c;
+}
+
+.unavailable_hours{
+    fill: #ff3f29;
+    fill-opacity: 0.35;
+}
+.avoid_hours{
+    fill: #ff9429;
+    fill-opacity: 0.30;
+}
