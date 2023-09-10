@@ -36,6 +36,8 @@ export default function Index(){
         update();
         window.addEventListener("resize", update);
 
+        return () => window.removeEventListener("resize", update);
+
     }, [schedule]);
 
     function renderScheduleSVG(width, height, schedule){
@@ -46,6 +48,9 @@ export default function Index(){
         const getY = (i) => {return ((i*h/10.75) + marginy)}
 
         //const colors = ["#666A86", "#788AA3", "#92B6B1", "#B2C9AB", "#E8DDB5"] //slate palette
+
+        const color_key = {};
+        var color_count = 0;
 
         return (
             <svg width={width} height={1.2*height}>
@@ -74,23 +79,29 @@ export default function Index(){
 
                 {schedule != null && (<>
                 <g>
-                    {schedule.classes.map((classSet, i) => (<g key={"class-set-" + i}>
-                        {classSet.map((cl, j) => (<g key={"class-" + i + "-" + j}>
-                            {cl.meeting_times.map(meeting_time => {
-                                const x = getX(meeting_time.day) + 0.14, y = getY(meeting_time.start_time/12.0) + 0.08;
-                                //style={{fill: colors[i % colors.length]}}
-                                return (<g key={"class-" + i + "-" + j + "-day-" + meeting_time.day}>
-                                <rect x={x + "%"} y={y + "%"} width={((w/5) - 0.14) + "%"} 
-                                height={(getY(meeting_time.end_time/12.0) - y) + "%"} 
-                                className={styles["palette-" + (i % 5)]} rx="6" ry="6" key={"class-" + cl.title + "-day-" + meeting_time.day}></rect>
-                                
-                                <g style={{fill: "#FFF"}} fontSize={width > 900 ? "13pt" : "8pt"}>
-                                    <text x={(x+0.5) + "%"} y={(y+2.4) + "%"} fontWeight="bold">{cl.title}</text>
-                                    <text x={(x+0.5) + "%"} y={(y+5) + "%"}>{(width > 590 ? "Section " : "") + cl.section + (width > 400 ? " (" + cl.type + ")" : "")}</text>
-                                </g>
-                                </g>)
-                            })}
-                        </g>))}
+                    {schedule.classes.map((cl, i) => (<g key={"class-set-" + i}>
+                        {cl.meeting_times.map(meeting_time => {
+                            const x = getX(meeting_time.day) + 0.14, y = getY(meeting_time.start_time/12.0) + 0.08;
+                            //style={{fill: colors[i % colors.length]}}
+
+                            var color_num = color_key[cl.title];
+                            if (color_num == undefined) {
+                                color_num = color_count;
+                                color_key[cl.title] = color_num;
+                                color_count = (color_count+1) % 5;
+                            }
+
+                            return (<g key={"class-" + i + "-day-" + meeting_time.day}>
+                            <rect x={x + "%"} y={y + "%"} width={((w/5) - 0.14) + "%"} 
+                            height={(getY(meeting_time.end_time/12.0) - y) + "%"} 
+                            className={styles["palette-" + color_num]} rx="6" ry="6" key={"class-" + cl.title + "-day-" + meeting_time.day}></rect>
+                            
+                            <g style={{fill: "#FFF"}} fontSize={width > 900 ? "13pt" : "8pt"}>
+                                <text x={(x+0.5) + "%"} y={(y+2.4) + "%"} fontWeight="bold">{cl.title}</text>
+                                <text x={(x+0.5) + "%"} y={(y+5) + "%"}>{(width > 590 ? "Section " : "") + cl.section + (width > 400 ? " (" + cl.type + ")" : "")}</text>
+                            </g>
+                            </g>)
+                        })}
                     </g>))}
                 </g>
                 </>)}
@@ -112,8 +123,13 @@ export default function Index(){
             })
         });
         const res = await res1.json();
-        console.log(res);
         setLoading(false);
+
+        if (res1.status == 200 && res.final_schedule != undefined){
+            const s = {classes: res.final_schedule};
+            s.avoid_times = schedule.avoid_times;
+            setSchedule(s);
+        } else console.error(res);
     }
 
     return(

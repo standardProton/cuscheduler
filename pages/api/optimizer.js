@@ -1,5 +1,5 @@
 import solver from "javascript-lp-solver/src/solver";
-
+import { isRangeIntersection } from "lib/utils";
 
 export default async function handler(req, res){
     if (req.method != "POST"){
@@ -78,7 +78,6 @@ export default async function handler(req, res){
             model_var["c" + i + "-enrolled"] = 1;
 
             if (offering.full) model_var.cost += 100;
-            //check unavailable hours here
 
             if (offering.meeting_times == undefined || offering.meeting_times.length == 0){
                 res.status(406).json({error_msg: "Class '" + title + "' offering #" + (j+1) + " does not define 'meeting_times'!"});
@@ -92,6 +91,8 @@ export default async function handler(req, res){
                     res.status(406).json({error_msg: "Malformatted meeting time in class '" + title + " offering #" + (j+1) + " meeting time #" + (k+1) + "! Check that the day, start_time, and end_time are correct."});
                     return;
                 }
+
+                //check avoid times
                 
                 for (let time_itr = mtime.start_time; time_itr <= mtime.end_time; time_itr++){ //every 5 min chunk in 1 class's meeting
                     model_var["d" + mtime.day + "-t" + time_itr] = 1; //model time (0-128), also books 5 mins after class ends
@@ -111,9 +112,7 @@ export default async function handler(req, res){
     const solved = solver.Solve(model)
     //const duration = (new Date()).getTime() - start;
 
-    console.log(solved);
-
-    const final_schedule = [];
+    const final_schedule = [], taken_ranges = [[], [], [], [], []];
     for (const [var_name, val] of Object.entries(solved)){
         const var_split = var_name.split("-");
         if (var_split.length == 2){ //class result
@@ -122,9 +121,19 @@ export default async function handler(req, res){
 
             add_class.title = preschedule[class_num].title;
             add_class.type = preschedule[class_num].type;
-            final_schedule.push(add_class);
+
+            let add = false;
+            for (let i = 0; i < add_class.meeting_times.length; i++){
+                const mtime = add_class.meeting_times[i];
+                if (solved.feasible || !isRangeIntersection([mtime.start_time, mtime.end_time], taken_ranges[mtime.day])){
+                    add = true;
+                    taken_ranges[mtime.day].push([mtime.start_time, mtime.end_time]);
+                } else break;
+            }
+
+            if (add) final_schedule.push(add_class);
         }
     }
 
-    res.status(200).json(final_schedule);
+    res.status(200).json({conflictions: solved.feasible ? 0 : min_enroll_count - final_schedule.length, final_schedule});
 }
