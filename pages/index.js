@@ -1,14 +1,15 @@
 
 import Head from "next/head.js";
-import { CUtoModelTime, ModelToCUTime } from "lib/cu_utils.js";
+import { CUtoModelTime, ModelToCUTime, getPreScheduleClass } from "lib/cu_utils.js";
 import { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import styles from "styles/Main.module.css";
-import Image from "next/Image";
+import Image from "next/image";
 import { preschedule_json } from "lib/json/preschedule.js";
 import { example_schedule } from "lib/json/example_schedule.js";
 
-export default function Index(){
+export default function Index() {
 
     const [page_setup, setPageSetup] = useState(false);
     const [schedule_svg, setScheduleSVG] = useState(null);
@@ -35,6 +36,14 @@ export default function Index(){
 
         update();
         window.addEventListener("resize", update);
+        document.onkeydown = async (e) => {
+            if (e.keyCode == 13){ //enter
+                const textinput = document.getElementById("class-search").value;
+                if (textinput.length == 0) return;
+                const c = await getPreScheduleClass(textinput);
+                console.log(c);
+            }
+        }
 
         return () => window.removeEventListener("resize", update);
 
@@ -129,6 +138,7 @@ export default function Index(){
             const s = {classes: res.final_schedule};
             s.avoid_times = schedule.avoid_times;
             setSchedule(s);
+            setStatusText("✅ Created optimal schedule");
         } else console.error(res);
     }
 
@@ -142,7 +152,7 @@ export default function Index(){
         <div className={styles.main_container}>
             <div className={styles.menu1}>
                 <div className={styles.menu1_settings}>
-                    Settings
+                    <TextField fullWidth label="Enter your classes" sx={{input: {color: "#FFF", background: "#37373f"}}} id="class-search"></TextField>
                     <div style={{position: "absolute", bottom: "10px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
                         <center>
                             <span><b>{status_message}</b></span>

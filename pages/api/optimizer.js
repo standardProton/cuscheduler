@@ -56,49 +56,45 @@ export default async function handler(req, res){
         variables: {},
         ints: {}
     }
-    const naming_key = {}
+
     for (let i = 0; i < preschedule.length; i++){ //each class to be scheduled
         if (preschedule[i].title == undefined || preschedule[i].offerings == undefined || preschedule[i].offerings.length == 0){
             res.status(406).json({error_msg: "Malformatted preschedule object (Index " + i + ")"});
             return;
         }
         const title = preschedule[i].title.toUpperCase();
-        if (naming_key[preschedule[i].title] != undefined) {
-            res.status(406).json({error_msg: "Duplicate class title: '" + title + "'"});
-            return;
-        }
-        naming_key["c" + i] = title;
-        naming_key[title] = i;
 
         model.constraints["c" + i + "-enrolled"] = {min: 0, max: 1};
 
-        for (let j = 0; j < preschedule[i].offerings.length; j++){ //each offering in class
+        for (let j = 0; j < Math.min(preschedule[i].offerings.length, 65); j++){ //each offering in class
             const offering = preschedule[i].offerings[j];
             const model_var = {enrolled_count: 1, cost: Math.random()}
             model_var["c" + i + "-enrolled"] = 1;
 
-            if (offering.full) model_var.cost += 100;
+            if (offering.full) model_var.cost += 10;
 
             if (offering.meeting_times == undefined || offering.meeting_times.length == 0){
                 res.status(406).json({error_msg: "Class '" + title + "' offering #" + (j+1) + " does not define 'meeting_times'!"});
                 return;
             }
 
+            let conflicts_avoid_times = false;
             for (let k = 0; k < offering.meeting_times.length; k++){ //for each time class meets in the week
                 const mtime = offering.meeting_times[k];
-                
                 if (mtime.day == undefined || mtime.day < 0 || mtime.day > 4 || mtime.start_time == undefined || mtime.end_time == undefined || mtime.start_time < 0 || mtime.start_time > 128-1 || mtime.end_time <= mtime.start_time || mtime.end_time > 128){
                     res.status(406).json({error_msg: "Malformatted meeting time in class '" + title + " offering #" + (j+1) + " meeting time #" + (k+1) + "! Check that the day, start_time, and end_time are correct."});
                     return;
                 }
 
-                //check avoid times
+                if (isRangeIntersection([mtime.start_time, mtime.end_time], avoid_times[mtime.day])) conflicts_avoid_times = true;
                 
-                for (let time_itr = mtime.start_time; time_itr <= mtime.end_time; time_itr++){ //every 5 min chunk in 1 class's meeting
+                for (let time_itr = mtime.start_time; time_itr <= mtime.end_time + 1; time_itr++){ //every 5 min chunk in 1 class's meeting
                     model_var["d" + mtime.day + "-t" + time_itr] = 1; //model time (0-128), also books 5 mins after class ends
                     model.constraints["d" + mtime.day + "-t" + time_itr] = {min: 0, max: 1};
                 }
             }
+
+            if (conflicts_avoid_times) model_var.cost += 100;
 
             model.variables["c" + i + "-o" + j] = model_var;
             model.ints["c" + i + "-o" + j] = 1;
@@ -108,9 +104,10 @@ export default async function handler(req, res){
     
     //console.log(model);
 
-    //const start = (new Date()).getTime();
+    const start = (new Date()).getTime();
     const solved = solver.Solve(model)
-    //const duration = (new Date()).getTime() - start;
+    const duration = (new Date()).getTime() - start;
+    console.log("duration = " + duration + "ms");
 
     const final_schedule = [], taken_ranges = [[], [], [], [], []];
     for (const [var_name, val] of Object.entries(solved)){

@@ -65,3 +65,10 @@
     fill: #ff9429;
     fill-opacity: 0.30;
 }*/
+
+
+@media (max-width: 750px){
+    .schedule_container{
+        overflow-x: auto;
+    }
+}
