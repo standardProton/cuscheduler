@@ -9,9 +9,18 @@ import Image from "next/image";
 import { preschedule_json } from "lib/json/preschedule.js";
 import { example_schedule } from "lib/json/example_schedule.js";
 
-export default function Index() {
+export async function getServerSideProps(context){
+    return {
+        props: {
+            context: {
+                cors_anywhere: process.env.CORS_ANYWHERE,
+            }
+        }
+    }
+}
 
-    const [page_setup, setPageSetup] = useState(false);
+export default function Index({context}) {
+
     const [schedule_svg, setScheduleSVG] = useState(null);
     const [loading, setLoading] = useState(false);
     const [status_message, setStatusText] = useState("Brought to you by a fellow Buff!");
@@ -19,7 +28,7 @@ export default function Index() {
     const [schedule, setSchedule] = useState(example_schedule);
 
     useEffect(() => {
-        if (typeof window == "undefined" || page_setup) return;
+        if (typeof window == "undefined") return;
 
         function update(){
             var width = window.innerWidth;
@@ -40,14 +49,23 @@ export default function Index() {
             if (e.keyCode == 13){ //enter
                 const textinput = document.getElementById("class-search").value;
                 if (textinput.length == 0) return;
-                const c = await getPreScheduleClass(textinput);
+                const c = await getPreScheduleClass(textinput, context.cors_anywhere);
                 console.log(c);
             }
         }
 
-        return () => window.removeEventListener("resize", update);
+        const search_box = document.getElementById("class-search");
+        const searchBoxType = (e) => {
+            console.log("change to " + e.target.value);
+        }
+        search_box.addEventListener("input", searchBoxType);
 
-    }, [schedule]);
+        return () => {
+            window.removeEventListener("resize", update);
+            search_box.removeEventListener("input", searchBoxType);
+        }
+
+    }, [schedule, context]);
 
     function renderScheduleSVG(width, height, schedule){
         const marginx_right = 5, marginx_left = 9000/width, marginy = 5; //percent
@@ -141,7 +159,7 @@ export default function Index() {
             setStatusText("✅ Created optimal schedule");
         } else console.error(res);
     }
-
+    
     return(
         <>
         <Head>

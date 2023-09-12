@@ -1,0 +1,887 @@
+{
+    "Computer": [
+        "CSCI 1000",
+        "CSCI 1300",
+        "CSCI 2270",
+        "CSCI 2400",
+        "CSCI 2820",
+        "CSCI 3002",
+        "CSCI 3593",
+        "CSCI 4133",
+        "CSCI 4229",
+        "CSCI 4250",
+        "CSCI 4413",
+        "CSCI 4830",
+        "CSCI 5000",
+        "CSCI 5100",
+        "CSCI 5229",
+        "CSCI 5413",
+        "CSCI 5722",
+        "CSCI 6000",
+        "CSCI 6100",
+        "CSCI 6200",
+        "CSCI 7000"
+    ],
+    "Science": [
+        "CSCI 1000",
+        "CSCI 1300",
+        "CSCI 2270",
+        "CSCI 2820",
+        "CSCI 3022",
+        "CSCI 3702",
+        "CSCI 4830",
+        "CSCI 5000",
+        "CSCI 5100",
+        "CSCI 6000",
+        "CSCI 6100",
+        "CSCI 6200",
+        "CSCI 6402",
+        "CSCI 7000",
+        "CSCI 7412",
+        "CSCI 7422",
+        "CSCI 7772"
+    ],
+    "Field": [
+        "CSCI 1000"
+    ],
+    "Work": [
+        "CSCI 1000"
+    ],
+    "Study": [
+        "CSCI 1000",
+        "MATH 4890"
+    ],
+    "Introduction": [
+        "CSCI 1200",
+        "CSCI 3022",
+        "CSCI 3202",
+        "CSCI 3302",
+        "CSCI 3403",
+        "CSCI 4200",
+        "CSCI 4616",
+        "CSCI 5000",
+        "CSCI 5160",
+        "CSCI 5200",
+        "CSCI 5444",
+        "CSCI 5616",
+        "CSCI 6000",
+        "MATH 2001",
+        "MATH 2002",
+        "MATH 2130",
+        "MATH 2135",
+        "MATH 2510",
+        "MATH 3510",
+        "MATH 4200",
+        "MATH 4510",
+        "MATH 4520",
+        "MATH 5200",
+        "MATH 5510",
+        "MATH 5520",
+        "MATH 6110",
+        "MATH 6210",
+        "MATH 6310"
+    ],
+    "Computational": [
+        "CSCI 1200",
+        "CSCI 4830",
+        "CSCI 6114"
+    ],
+    "Thinking": [
+        "CSCI 1200"
+    ],
+    "Starting": [
+        "CSCI 1300"
+    ],
+    "Computing": [
+        "CSCI 1300",
+        "CSCI 4253",
+        "CSCI 4348",
+        "CSCI 4576",
+        "CSCI 5253",
+        "CSCI 5340",
+        "CSCI 5576"
+    ],
+    "Data": [
+        "CSCI 2270",
+        "CSCI 2275",
+        "CSCI 3022",
+        "CSCI 4502",
+        "CSCI 5010",
+        "CSCI 5502",
+        "MATH 1212"
+    ],
+    "Structures": [
+        "CSCI 2270",
+        "CSCI 2275",
+        "CSCI 2824",
+        "CSCI 2834"
+    ],
+    "Programming": [
+        "CSCI 2275",
+        "CSCI 3010",
+        "CSCI 3155",
+        "CSCI 4313",
+        "CSCI 5020",
+        "CSCI 5313",
+        "CSCI 5535"
+    ],
+    "Systems": [
+        "CSCI 2400",
+        "CSCI 3287",
+        "CSCI 3753",
+        "CSCI 4200",
+        "CSCI 4253",
+        "CSCI 5200",
+        "CSCI 5253",
+        "CSCI 5273",
+        "CSCI 5573",
+        "CSCI 5817",
+        "CSCI 5854"
+    ],
+    "Linear": [
+        "CSCI 2820",
+        "CSCI 5646",
+        "MATH 2130",
+        "MATH 2135"
+    ],
+    "Algebra": [
+        "CSCI 2820",
+        "CSCI 5646",
+        "MATH 1011",
+        "MATH 2130",
+        "MATH 2135",
+        "MATH 3140",
+        "MATH 6130",
+        "MATH 6290"
+    ],
+    "Applications": [
+        "CSCI 2820",
+        "CSCI 5254"
+    ],
+    "Discrete": [
+        "CSCI 2824",
+        "CSCI 2834",
+        "MATH 2001"
+    ],
+    "Workgroup": [
+        "CSCI 2834"
+    ],
+    "Calculating": [
+        "CSCI 2897"
+    ],
+    "Biological": [
+        "CSCI 2897"
+    ],
+    "Quantities": [
+        "CSCI 2897"
+    ],
+    "Fundamentals": [
+        "CSCI 3002",
+        "CSCI 4133",
+        "CSCI 5010",
+        "CSCI 5020",
+        "CSCI 5030"
+    ],
+    "Human": [
+        "CSCI 3002"
+    ],
+    "Interaction": [
+        "CSCI 3002",
+        "CSCI 4830",
+        "CSCI 7000"
+    ],
+    "Intensive": [
+        "CSCI 3010"
+    ],
+    "Workshop": [
+        "CSCI 3010"
+    ],
+    "Probability": [
+        "CSCI 3022",
+        "MATH 3510",
+        "MATH 4510",
+        "MATH 5510",
+        "MATH 6534"
+    ],
+    "Statistics": [
+        "CSCI 3022",
+        "MATH 2510",
+        "MATH 3510",
+        "MATH 4520",
+        "MATH 5520"
+    ],
+    "Algorithms": [
+        "CSCI 3104",
+        "CSCI 5454"
+    ],
+    "Universal": [
+        "CSCI 3150"
+    ],
+    "Design": [
+        "CSCI 3150",
+        "CSCI 3287",
+        "CSCI 3753",
+        "CSCI 4448",
+        "CSCI 4830",
+        "CSCI 5448",
+        "CSCI 5454",
+        "CSCI 5839"
+    ],
+    "Digital": [
+        "CSCI 3150"
+    ],
+    "Media": [
+        "CSCI 3150"
+    ],
+    "Principles": [
+        "CSCI 3155"
+    ],
+    "Languages": [
+        "CSCI 3155",
+        "CSCI 5535"
+    ],
+    "Artificial": [
+        "CSCI 3202"
+    ],
+    "Intelligence": [
+        "CSCI 3202"
+    ],
+    "Analysis": [
+        "CSCI 3287",
+        "CSCI 3753",
+        "CSCI 4448",
+        "CSCI 5448",
+        "CSCI 5454",
+        "MATH 1112",
+        "MATH 3001",
+        "MATH 4001",
+        "MATH 5001",
+        "MATH 5600",
+        "MATH 6310",
+        "MATH 8330"
+    ],
+    "Database": [
+        "CSCI 3287",
+        "CSCI 5817"
+    ],
+    "Robotics": [
+        "CSCI 3302",
+        "CSCI 4302",
+        "CSCI 5302"
+    ],
+    "Software": [
+        "CSCI 3308",
+        "CSCI 4118",
+        "CSCI 4308",
+        "CSCI 4328",
+        "CSCI 4338",
+        "CSCI 6118"
+    ],
+    "Development": [
+        "CSCI 3308",
+        "CSCI 5839",
+        "CSCI 6200"
+    ],
+    "Methods": [
+        "CSCI 3308",
+        "CSCI 6402"
+    ],
+    "Tools": [
+        "CSCI 3308"
+    ],
+    "CyberSecurity": [
+        "CSCI 3403"
+    ],
+    "Converged": [
+        "CSCI 3403"
+    ],
+    "World": [
+        "CSCI 3403"
+    ],
+    "Theory": [
+        "CSCI 3434",
+        "CSCI 5444",
+        "CSCI 6114",
+        "MATH 4510",
+        "MATH 4730",
+        "MATH 5510",
+        "MATH 5730",
+        "MATH 6010",
+        "MATH 6110",
+        "MATH 6190"
+    ],
+    "Computation": [
+        "CSCI 3434",
+        "CSCI 3656",
+        "CSCI 5444"
+    ],
+    "Organization": [
+        "CSCI 3593"
+    ],
+    "Numerical": [
+        "CSCI 3656",
+        "CSCI 5636",
+        "CSCI 5646",
+        "MATH 5600"
+    ],
+    "Cognitive": [
+        "CSCI 3702",
+        "CSCI 6402",
+        "CSCI 7412",
+        "CSCI 7422",
+        "CSCI 7772"
+    ],
+    "Operating": [
+        "CSCI 3753",
+        "CSCI 5573"
+    ],
+    "Linux": [
+        "CSCI 4113",
+        "CSCI 5113"
+    ],
+    "System": [
+        "CSCI 4113",
+        "CSCI 5030",
+        "CSCI 5113"
+    ],
+    "Administration": [
+        "CSCI 4113",
+        "CSCI 5030",
+        "CSCI 5113"
+    ],
+    "Engineering": [
+        "CSCI 4118",
+        "CSCI 4308",
+        "CSCI 6118"
+    ],
+    "Scientists": [
+        "CSCI 4118",
+        "CSCI 6118"
+    ],
+    "Security": [
+        "CSCI 4133",
+        "CSCI 4413",
+        "CSCI 5413"
+    ],
+    "Wireless": [
+        "CSCI 4200",
+        "CSCI 5200"
+    ],
+    "Graphics": [
+        "CSCI 4229",
+        "CSCI 5229"
+    ],
+    "Science:": [
+        "CSCI 4250",
+        "CSCI 4830",
+        "CSCI 7000"
+    ],
+    "Canon": [
+        "CSCI 4250"
+    ],
+    "Datacenter": [
+        "CSCI 4253",
+        "CSCI 5253",
+        "CSCI 5260"
+    ],
+    "Scale": [
+        "CSCI 4253",
+        "CSCI 5253"
+    ],
+    "Methods,": [
+        "CSCI 4253",
+        "CSCI 5253"
+    ],
+    "Techniques": [
+        "CSCI 4253",
+        "CSCI 5253"
+    ],
+    "Advanced": [
+        "CSCI 4302",
+        "CSCI 5302",
+        "CSCI 5573",
+        "CSCI 7000"
+    ],
+    "Project": [
+        "CSCI 4308",
+        "CSCI 4328",
+        "CSCI 4338",
+        "CSCI 5040"
+    ],
+    "Concurrent": [
+        "CSCI 4313",
+        "CSCI 5313"
+    ],
+    "Management": [
+        "CSCI 4328",
+        "CSCI 4338"
+    ],
+    "Mentoring": [
+        "CSCI 4328"
+    ],
+    "Startup": [
+        "CSCI 4348",
+        "CSCI 5340"
+    ],
+    "Essentials:": [
+        "CSCI 4348",
+        "CSCI 5340"
+    ],
+    "Entrepreneurial": [
+        "CSCI 4348",
+        "CSCI 5340"
+    ],
+    "Projects": [
+        "CSCI 4348",
+        "CSCI 5340"
+    ],
+    "Ethical": [
+        "CSCI 4413",
+        "CSCI 5413"
+    ],
+    "Hacking": [
+        "CSCI 4413",
+        "CSCI 5413"
+    ],
+    "Object-Oriented": [
+        "CSCI 4448",
+        "CSCI 5448"
+    ],
+    "Mining": [
+        "CSCI 4502",
+        "CSCI 5502"
+    ],
+    "High-Performance": [
+        "CSCI 4576",
+        "CSCI 5576"
+    ],
+    "Scientific": [
+        "CSCI 4576",
+        "CSCI 5576"
+    ],
+    "Virtual": [
+        "CSCI 4616",
+        "CSCI 5616"
+    ],
+    "Reality": [
+        "CSCI 4616",
+        "CSCI 5616"
+    ],
+    "Machine": [
+        "CSCI 4622",
+        "CSCI 5622",
+        "CSCI 7000"
+    ],
+    "Learning": [
+        "CSCI 4622",
+        "CSCI 5622",
+        "CSCI 5922",
+        "CSCI 7000"
+    ],
+    "Special": [
+        "CSCI 4830"
+    ],
+    "Topics": [
+        "CSCI 4830",
+        "CSCI 7000",
+        "CSCI 7772",
+        "MATH 6534"
+    ],
+    "Phys": [
+        "CSCI 4830",
+        "CSCI 7000"
+    ],
+    "Human-Robot": [
+        "CSCI 4830",
+        "CSCI 7000"
+    ],
+    "Fabrication": [
+        "CSCI 4830"
+    ],
+    "Multidisciplinary": [
+        "CSCI 4830"
+    ],
+    "Research-Based": [
+        "CSCI 5000"
+    ],
+    "MS": [
+        "CSCI 5000"
+    ],
+    "Program": [
+        "CSCI 5000",
+        "CSCI 6000"
+    ],
+    "Communication": [
+        "CSCI 5010"
+    ],
+    "Network": [
+        "CSCI 5020",
+        "CSCI 5273"
+    ],
+    "Virtualization": [
+        "CSCI 5030"
+    ],
+    "Professional": [
+        "CSCI 5040"
+    ],
+    "Masters": [
+        "CSCI 5040"
+    ],
+    "Colloquium": [
+        "CSCI 5100",
+        "CSCI 6100"
+    ],
+    "Computer-Aided": [
+        "CSCI 5135"
+    ],
+    "Verification": [
+        "CSCI 5135"
+    ],
+    "Enterprise": [
+        "CSCI 5160"
+    ],
+    "Networks": [
+        "CSCI 5160",
+        "CSCI 5260",
+        "CSCI 5922"
+    ],
+    "Convex": [
+        "CSCI 5254"
+    ],
+    "Optimization": [
+        "CSCI 5254"
+    ],
+    "Software-Defined": [
+        "CSCI 5280"
+    ],
+    "Networking": [
+        "CSCI 5280"
+    ],
+    "Cybersecurity": [
+        "CSCI 5403",
+        "CSCI 5523"
+    ],
+    "Modern": [
+        "CSCI 5523"
+    ],
+    "Offense": [
+        "CSCI 5523"
+    ],
+    "Defense": [
+        "CSCI 5523"
+    ],
+    "Fundamental": [
+        "CSCI 5535"
+    ],
+    "Concepts": [
+        "CSCI 5535"
+    ],
+    "Solution": [
+        "CSCI 5636"
+    ],
+    "Partial": [
+        "CSCI 5636",
+        "MATH 4470",
+        "MATH 5470"
+    ],
+    "Differential": [
+        "CSCI 5636",
+        "MATH 3430",
+        "MATH 4470",
+        "MATH 5470"
+    ],
+    "Equations": [
+        "CSCI 5636",
+        "MATH 3430",
+        "MATH 4470",
+        "MATH 5470"
+    ],
+    "Vision": [
+        "CSCI 5722",
+        "CSCI 7000"
+    ],
+    "Natural": [
+        "CSCI 5832"
+    ],
+    "Language": [
+        "CSCI 5832"
+    ],
+    "Processing": [
+        "CSCI 5832"
+    ],
+    "User-Centered": [
+        "CSCI 5839"
+    ],
+    "Theoretical": [
+        "CSCI 5854"
+    ],
+    "Foundations": [
+        "CSCI 5854"
+    ],
+    "Autonomous": [
+        "CSCI 5854"
+    ],
+    "Neural": [
+        "CSCI 5922"
+    ],
+    "Deep": [
+        "CSCI 5922"
+    ],
+    "HCC": [
+        "CSCI 5929"
+    ],
+    "Survey": [
+        "CSCI 5929"
+    ],
+    "Synthesis:": [
+        "CSCI 5929"
+    ],
+    "New": [
+        "CSCI 5929"
+    ],
+    "Disciplinary": [
+        "CSCI 5929"
+    ],
+    "Directions": [
+        "CSCI 5929"
+    ],
+    "PhD": [
+        "CSCI 6000",
+        "CSCI 6200"
+    ],
+    "Complexity": [
+        "CSCI 6114"
+    ],
+    "Career": [
+        "CSCI 6200"
+    ],
+    "Issues": [
+        "CSCI 6402"
+    ],
+    "Current": [
+        "CSCI 7000"
+    ],
+    "Online": [
+        "CSCI 7000"
+    ],
+    "ML,": [
+        "CSCI 7000"
+    ],
+    "E-Values,": [
+        "CSCI 7000"
+    ],
+    "Markets": [
+        "CSCI 7000"
+    ],
+    "Advances": [
+        "CSCI 7000"
+    ],
+    "Neuro-Symbolic": [
+        "CSCI 7000"
+    ],
+    "Approach": [
+        "CSCI 7000"
+    ],
+    "NLP": [
+        "CSCI 7000"
+    ],
+    "Comp": [
+        "CSCI 7000"
+    ],
+    "Models": [
+        "CSCI 7000",
+        "MATH 1212"
+    ],
+    "Discourse": [
+        "CSCI 7000"
+    ],
+    "Writing": [
+        "CSCI 7000"
+    ],
+    "Physical": [
+        "CSCI 7000"
+    ],
+    "Telepresence": [
+        "CSCI 7000"
+    ],
+    "Research": [
+        "CSCI 7412",
+        "CSCI 7422"
+    ],
+    "Practicum": [
+        "CSCI 7412",
+        "CSCI 7422"
+    ],
+    "College": [
+        "MATH 1011"
+    ],
+    "Quantitative": [
+        "MATH 1012"
+    ],
+    "Reasoning": [
+        "MATH 1012"
+    ],
+    "Mathematical": [
+        "MATH 1012",
+        "MATH 1112",
+        "MATH 4520",
+        "MATH 4820",
+        "MATH 5030",
+        "MATH 5520",
+        "MATH 5820",
+        "MATH 6534"
+    ],
+    "Skills": [
+        "MATH 1012"
+    ],
+    "Mathematics": [
+        "MATH 1110",
+        "MATH 1150",
+        "MATH 2001",
+        "MATH 2002",
+        "MATH 2135",
+        "MATH 4440",
+        "MATH 5440",
+        "MATH 5905"
+    ],
+    "Elementary": [
+        "MATH 1110"
+    ],
+    "Educators": [
+        "MATH 1110"
+    ],
+    "Business": [
+        "MATH 1112"
+    ],
+    "Precalculus": [
+        "MATH 1150",
+        "MATH 1151"
+    ],
+    "Supplemental": [
+        "MATH 1151",
+        "MATH 1301"
+    ],
+    "Lab": [
+        "MATH 1151",
+        "MATH 1301"
+    ],
+    "Calculus": [
+        "MATH 1300",
+        "MATH 1301",
+        "MATH 2300",
+        "MATH 2400"
+    ],
+    "Number": [
+        "MATH 2002",
+        "MATH 6110",
+        "MATH 6190"
+    ],
+    "Systems:": [
+        "MATH 2002"
+    ],
+    "Higher": [
+        "MATH 2002"
+    ],
+    "Non-Mathematics": [
+        "MATH 2130"
+    ],
+    "Majors": [
+        "MATH 2130",
+        "MATH 2135"
+    ],
+    "Functions": [
+        "MATH 3120",
+        "MATH 6360"
+    ],
+    "Modeling": [
+        "MATH 3120"
+    ],
+    "Abstract": [
+        "MATH 3140"
+    ],
+    "Ordinary": [
+        "MATH 3430"
+    ],
+    "Topology": [
+        "MATH 4200",
+        "MATH 5200",
+        "MATH 6210"
+    ],
+    "Coding": [
+        "MATH 4440",
+        "MATH 5440"
+    ],
+    "Cryptography": [
+        "MATH 4440",
+        "MATH 5440"
+    ],
+    "Set": [
+        "MATH 4730",
+        "MATH 5730"
+    ],
+    "History": [
+        "MATH 4820",
+        "MATH 5820"
+    ],
+    "Ideas": [
+        "MATH 4820",
+        "MATH 5820"
+    ],
+    "Honors": [
+        "MATH 4890"
+    ],
+    "Independent": [
+        "MATH 4890"
+    ],
+    "Intermediate": [
+        "MATH 5030"
+    ],
+    "Physics": [
+        "MATH 5030"
+    ],
+    "Teacher": [
+        "MATH 5905"
+    ],
+    "Training": [
+        "MATH 5905"
+    ],
+    "Computability": [
+        "MATH 6010"
+    ],
+    "Analytic": [
+        "MATH 6190"
+    ],
+    "Geometry": [
+        "MATH 6260"
+    ],
+    "Quantum": [
+        "MATH 6260"
+    ],
+    "Fields": [
+        "MATH 6260"
+    ],
+    "Strings": [
+        "MATH 6260"
+    ],
+    "Homological": [
+        "MATH 6290"
+    ],
+    "Real": [
+        "MATH 6310"
+    ],
+    "Complex": [
+        "MATH 6360"
+    ],
+    "Variable": [
+        "MATH 6360"
+    ],
+    "Functional": [
+        "MATH 8330"
+    ],
+    "Ulam": [
+        "MATH 8815"
+    ],
+    "Seminar": [
+        "MATH 8815"
+    ]
+}
