@@ -21,6 +21,7 @@
     min-height: calc(100vh - 65px - 20px);
     padding: 10px;
     position: relative;
+    overflow-y: auto;
 }
 
 .menu1_submit{
@@ -65,6 +66,43 @@
     fill: #ff9429;
     fill-opacity: 0.30;
 }*/
+
+.class_suggestions{
+    width: 100%;
+    margin-top: 15px;
+    border: 1px solid #FFF;
+    border-radius: 4px;
+    min-height: 180px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 14pt;
+}
+
+.class_suggestion{
+    padding: 10px;
+    cursor: pointer;
+}
+.class_suggestion_a{
+    background-color: #37373f;
+}
+.class_suggestion_a:hover{
+    background-color: #44444b;
+}
+.class_suggestion_b:hover{
+    background-color: #44444b;
+}
+
+.class_list_chips{
+    width: 100%;
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    background: #37373f;
+    border: 1px solid #FFF;
+    border-radius: 4px;
+    min-height: 90px;
+
+}
 
 
 @media (max-width: 750px){
