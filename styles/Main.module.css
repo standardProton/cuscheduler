@@ -7,10 +7,17 @@
 
 .menu1{
     min-width: 200px;
-    width: 20%;
-    max-width: 300px;
+    width: 23%;
+    max-width: 350px;
     background-color: #2c2c34;
 
+}
+.schedule_container{
+    width: 81%;
+    background-color: #1b1b22;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100vh;
 }
 
 .shadow{ /*4, 8, 6, 20*/
@@ -22,6 +29,7 @@
     padding: 10px;
     position: relative;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .menu1_submit{
@@ -32,14 +40,6 @@
     text-align: right;
     justify-content: right;
     display: flex;
-}
-
-.schedule_container{
-    width: 84%;
-    background-color: #1b1b22;
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: 100vh;
 }
 
 .palette-0{
@@ -70,12 +70,12 @@
 .class_suggestions{
     width: 100%;
     margin-top: 15px;
-    border: 1px solid #FFF;
-    border-radius: 4px;
+    border-radius: 3px;
     min-height: 180px;
     max-height: 300px;
     overflow-y: auto;
     font-size: 14pt;
+    background-color: #37373f;
 }
 
 .class_suggestion{
@@ -101,9 +101,17 @@
     border: 1px solid #FFF;
     border-radius: 4px;
     min-height: 90px;
-
+    max-height: 230px;
+    overflow-y: auto;
 }
 
+.unavailable_time_settings{
+    border-radius: 4px;
+    border: 1px solid #FFF;
+    font-size: 12pt;
+    margin-top: 15px;
+    padding: 10px;
+}
 
 @media (max-width: 750px){
     .schedule_container{

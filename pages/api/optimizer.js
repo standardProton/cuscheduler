@@ -1,10 +1,50 @@
+import { isRangeIntersection, isSameSchedule } from "lib/utils";
 import solver from "javascript-lp-solver/src/solver";
-import { isRangeIntersection } from "lib/utils";
+import { example_schedule, example_schedule2 } from "../../lib/json/example_schedule";
 
 export function randomCost(i){ //basic seeded pseudorandom function
-    return Math.random();
-    //const n = Math.pow(i, 2)*(100/9.0)*Math.E;
-    //return n - Math.trunc(n);
+    const n = Math.pow(i + 8, 2)*(100/9.0)*Math.E;
+    return n - Math.trunc(n);
+}
+
+export async function solve(model, preschedule, random_itr){
+
+    //add random noise to costs
+    let random_itr2 = 0;
+    for (const [var_name, val] of Object.entries(model.variables)){
+        model.variables[var_name].cost = model.variables[var_name].cost_orig + randomCost(random_itr + random_itr2);
+        random_itr2++;
+    }
+
+    //console.log(model);
+
+    const solved = solver.Solve(model)
+
+    const final_schedule = [], taken_ranges = [[], [], [], [], []], added_classes = [];
+    for (const [var_name, val] of Object.entries(solved)){
+        const var_split = var_name.split("-");
+        if (var_split.length == 2){ //class result
+            const class_num = parseInt(var_split[0].substring(1)), offering_num = parseInt(var_split[1].substring(1));
+            const add_class = preschedule[class_num].offerings[offering_num];
+
+            add_class.title = preschedule[class_num].title;
+            add_class.type = preschedule[class_num].type;
+            
+            let add = add_class.meeting_times.length == 0;
+            for (let i = 0; i < add_class.meeting_times.length; i++){
+                const mtime = add_class.meeting_times[i];
+                if (solved.feasible || (!added_classes.includes(add_class.title + " " + add_class.type) && !isRangeIntersection([mtime.start_time, mtime.end_time], taken_ranges[mtime.day]))){
+                    add = true;
+                    taken_ranges[mtime.day].push([mtime.start_time, mtime.end_time]);
+                    added_classes.push(add_class.title + " " + add_class.type);
+                } else break;
+            }
+
+            if (add) final_schedule.push(add_class);
+        }
+    }
+
+    return {feasible: solved.feasible, classes: final_schedule}
 }
 
 export default async function handler(req, res){
@@ -43,7 +83,7 @@ export default async function handler(req, res){
             return;
         }
     }
-    if (preschedule.length > 20){
+    if (preschedule.length > 12){
         res.status(406).json({error_msg: "Exceeded the maximum number of classes!"});
         return;
     }
@@ -77,13 +117,13 @@ export default async function handler(req, res){
 
         for (let j = 0; j < Math.min(preschedule[i].offerings.length, 65); j++){ //each offering in class
             const offering = preschedule[i].offerings[j];
-            const model_var = {enrolled_count: 1, cost: randomCost(cost_count + 8)}
+            const model_var = {enrolled_count: 1, cost: 0, cost_orig: 0}
             cost_count++;
             model_var["c" + i + "-enrolled"] = 1;
 
-            if (offering.full && premium) model_var.cost += 10;
+            if (offering.full && premium) model_var.cost_orig += 10;
 
-            if (offering.meeting_times == undefined || offering.meeting_times.length == 0){
+            if (offering.meeting_times == undefined){ //if len 0, class is async
                 res.status(406).json({error_msg: "Class '" + title + "' offering #" + j + " does not define 'meeting_times'!"});
                 return;
             }
@@ -104,7 +144,7 @@ export default async function handler(req, res){
                 }
             }
 
-            if (conflicts_avoid_times) model_var.cost += 100;
+            if (conflicts_avoid_times) model_var.cost_orig += 100;
 
             model.variables["c" + i + "-o" + j] = model_var;
             model.ints["c" + i + "-o" + j] = 1;
@@ -114,33 +154,27 @@ export default async function handler(req, res){
     
     //console.log(model);
 
-    const start = (new Date()).getTime();
-    const solved = solver.Solve(model)
-    const duration = (new Date()).getTime() - start;
-    console.log("duration = " + duration + "ms");
+    const schedules = [], start = (new Date()).getTime();
 
-    const final_schedule = [], taken_ranges = [[], [], [], [], []];
-    for (const [var_name, val] of Object.entries(solved)){
-        const var_split = var_name.split("-");
-        if (var_split.length == 2){ //class result
-            const class_num = parseInt(var_split[0].substring(1)), offering_num = parseInt(var_split[1].substring(1));
-            const add_class = preschedule[class_num].offerings[offering_num];
+    var random_itr = 0;
+    while (schedules.length < 10 && random_itr < 20){
+        const solved = await solve(model, preschedule, random_itr);
 
-            add_class.title = preschedule[class_num].title;
-            add_class.type = preschedule[class_num].type;
+        var duplicate = false;
 
-            let add = false;
-            for (let i = 0; i < add_class.meeting_times.length; i++){
-                const mtime = add_class.meeting_times[i];
-                if (solved.feasible || !isRangeIntersection([mtime.start_time, mtime.end_time], taken_ranges[mtime.day])){
-                    add = true;
-                    taken_ranges[mtime.day].push([mtime.start_time, mtime.end_time]);
-                } else break;
-            }
-
-            if (add) final_schedule.push(add_class);
+        for (let j = 0; j < schedules.length; j++){
+            if (isSameSchedule(schedules[j], solved)) duplicate = true;
         }
+        if (!duplicate){
+            if (!solved.feasible) console.log("INFEASIBLE");
+            schedules.push(solved);
+        }
+        random_itr++;
     }
 
-    res.status(200).json({conflictions: solved.feasible ? 0 : min_enroll_count - final_schedule.length, final_schedule});
+    console.log("Took " + ((new Date()).getTime() - start) + "ms");
+    console.log(schedules.length + " unique schedules");
+
+    //res.status(200).json({conflictions: solved.feasible ? 0 : min_enroll_count - solved.final_schedule.length, final_schedule: solved.final_schedule});
+    res.status(200).json({conflictions: 0, schedule_count: schedules.length, schedules});
 }
