@@ -11,10 +11,12 @@ import styles from "styles/Main.module.css";
 import Image from "next/image";
 import { preschedule_json } from "lib/json/preschedule.js";
 import { example_schedule } from "lib/json/example_schedule.js";
-import {renderScheduleSVG} from "lib/utils.js";
+import {renderScheduleSVG, isRangeIntersectionSingle, timeString } from "lib/utils.js";
 import { lookup_map } from "lib/json/lookup_map.js";
 import { name_map } from "lib/json/name_map.js";
-import { Card, Box, CardContent, MenuItem, CardActionArea, Typography, Grid } from "@mui/material";
+import { Card, Box, CardContent, MenuItem, CardActionArea, Typography, Grid, FormHelperText } from "@mui/material";
+import { MAX_MODEL_TIME } from "../lib/json/consts";
+import React from "react";
 
 export async function getServerSideProps(context){
     return {
@@ -38,7 +40,15 @@ export default function Index({context}) {
     });
     const [class_suggestions, setClassSuggestions] = useState([]);
     const [color_key, setColorKey] = useState({});
-    const [select_unavailable_days, setSelectUnavailableDays] = useState([-1]);
+    const [ut_create0, setUTCreatorStart] = useState(null);
+    const [ut_create1, setUTCreatorEnd] = useState(null);
+
+    //get this outta here
+    const [ut_days, setSelectUnavailableDays] = useState([-1]);
+    const [ut_start, setUnavailableStart] = useState(null);
+    const [ut_start_input, setUnavailableStartInput] = useState({"$H": 8, "$m": 0});
+    const [ut_end, setUnavailableEnd] = useState(null);
+    const [ut_end_input, setUnavailableEndInput] = useState({"$H": 9, "$m": 0});
 
     useEffect(() => {
         if (typeof window == "undefined") return;
@@ -48,13 +58,21 @@ export default function Index({context}) {
             if (window.innerWidth > 650) { //update with phone threshold
                 const css_percentage = 0.23, css_min = 200, css_max = 350; //menu1 class
                 const percent = window.innerWidth*css_percentage;
-
+    
                 if (percent < css_min) width = window.innerWidth - css_min;
                 else if (percent > css_max) width = window.innerWidth - css_max;
                 else width = window.innerWidth*(1-css_percentage);
             }
 
-            setScheduleSVG(renderScheduleSVG(width, window.innerHeight-4, schedule, color_key, setColorKey));
+            const options = {
+                ut_start: ut_create0,
+                ut_end: ut_create1
+            }
+
+            console.log(options);
+    
+            //console.log("Update");
+            setScheduleSVG(renderScheduleSVG(width, window.innerHeight-4, schedule, color_key, setColorKey, scheduleClick, scheduleHover, options));
         }
 
         update();
@@ -64,13 +82,20 @@ export default function Index({context}) {
                 const textinput = document.getElementById("class-search").value;
                 addPrescheduleClass(textinput);
             }
+            else if (e.keyCode == 27){
+                setUTCreatorStart(null);
+                setUTCreatorEnd(null);
+            }
         }
 
         const search_box = document.getElementById("class-search");
         const searchBoxType = (e) => {
             const t = e.target.value;
             const suggestions = [];
-            if (t.length == 0) return;
+            if (t.length == 0) {
+                setClassSuggestions([]);
+                return;
+            }
 
             const word_split = t.split(" ");
 
@@ -90,7 +115,6 @@ export default function Index({context}) {
                                 for (let k = 0; k < word_split.length; k++){
                                     if (i != k && !name_map[res[j]].toLowerCase().includes(word_split[k].toLowerCase())) {
                                         add = false;
-                                        console.log("add = false, code=" + res[j] + ", title=" + name_map[res[j]] + ", not includes " + word_split[k]);
                                         break;
                                     }
                                 }
@@ -98,12 +122,6 @@ export default function Index({context}) {
                             }
                         }
                     }
-                    /*if (word.charAt(word.length-1) != "s"){
-                        const res2 = lookup_map[word + "s"];
-                        if (res2 != undefined){
-                            for (let j = 0; j < res2.length; j++) if (!suggestions.includes(res2[j])) suggestions.push(res2[j]);
-                        }
-                    }*/
                 }
             }
 
@@ -116,7 +134,53 @@ export default function Index({context}) {
             search_box.removeEventListener("input", searchBoxType);
         }
 
-    }, [schedule, context]);
+    }, [schedule, preschedule, ut_create0, ut_create1, context]);
+
+    function scheduleClick(day, time){
+        if (ut_create0 == null){
+            setUTCreatorStart([day, time]);
+        } else if (ut_create1 != null) {
+            const avoid_times = schedule.avoid_times;
+            for (let i = Math.min(ut_create0[0], ut_create1[0]); i <= Math.max(ut_create0[0], ut_create1[0]); i++){
+                var add_new = true;
+                const new_ut = [Math.min(ut_create0[1], ut_create1[1]), Math.max(ut_create0[1], ut_create1[1])];
+                const day = i;
+                console.log("i = " + i);
+
+                if (day > 4) continue;
+
+                for (let j = 0; j < avoid_times[day].length; j++){
+                    const existing_ut = avoid_times[day][j];
+                    if (isRangeIntersectionSingle(new_ut, existing_ut)){
+                        if (new_ut[0] < existing_ut[0]) {
+                            existing_ut[0] = new_ut[0];
+                            add_new = false;
+                        }
+                        if (new_ut[1] > existing_ut[1]){
+                            existing_ut[1] = new_ut[1];
+                            add_new = false;
+                        }
+                        if (new_ut[0] > existing_ut[0] && new_ut[1] < existing_ut[1]) add_new = false;
+                        if (!add_new) break;
+                    }
+                }
+                //console.log("day = " + ut_days[i] + ", uts = " + ut_start + ", ute = " + ut_end + ", add_new = " + add_new);
+                if (add_new) avoid_times[day].push(new_ut);
+            }
+
+            //console.log("avoid times:");
+            //console.log(schedule.avoid_times);
+            setUTCreatorStart(null);
+            setUTCreatorEnd(null);
+            //setSelectUnavailableDays([-1]);
+            setSchedule({classes: schedule.classes, avoid_times});
+        }
+    }
+    function scheduleHover(day, time){
+        if (ut_create0 != null){
+            setUTCreatorEnd([day, time]);
+        }
+    }
 
     async function addPrescheduleClass(class_code){
         if (class_code.length == 0 || loading) return;
@@ -143,6 +207,7 @@ export default function Index({context}) {
         }
 
         setPreSchedule(preschedule);
+        //update(window, preschedule);
         setLoading(false);
         document.getElementById("class-search").value = "";
 
@@ -179,7 +244,7 @@ export default function Index({context}) {
             s.avoid_times = schedule.avoid_times;
             setSchedule(s);
 
-            if (res.conflictions == 0) setStatusText("✅ Created optimal schedule");
+            if (res.conflictions == 0) setStatusText("✅ Created schedule");
             else setStatusText("❌ Could not fit " + res.conflictions + " class" + (res.conflictions == 1 ? "" : "es") + " into schedule!")
         } else {
             console.error(res.error_msg);
@@ -191,7 +256,7 @@ export default function Index({context}) {
         <>
         <Head>
             <link rel="icon" href="/favicon.png"></link>
-            <title>Build Your Perfect CU Boulder Class Schedule in only 60 Seconds | CU Schedule Builder</title>
+            <title>#1 CU Boulder Schedule Builder | Make Your Schedule Perfect in only 60 Seconds</title>
             <meta name="description" content="Cut down on stress and supercharge your sleep schedule with an optimized class schedule! Fit your courses around your work schedule and personal time."></meta>
         </Head>
         <div className={styles.main_container}>
@@ -206,76 +271,60 @@ export default function Index({context}) {
                             </div>
                         ))}
                     </div>)}
-                    {false && (<div className={styles.class_list_chips}>
-                            {preschedule.map((cl, i) => (
-                                <div style={{margin: "5px"}} key={"class-chip-" + i}>
-                                    <Chip label={cl.title + " (" + cl.type + ")"} variant="filled" onDelete={() => removePrescheduleClass(cl)} style={{backgroundColor: "#e2e2e2"}}></Chip>
-                                </div>
-                            ))}
-                            {preschedule.length == 0 && (<div style={{paddingLeft: "5px"}}>
-                                <span style={{fontSize: "8pt", color: "rgba(255, 255, 255, 0.50)"}}>Search your classes to begin</span>
-                            </div>)}
-                    </div>)}
                     <div style={{marginTop: "15px"}}>
                         <Card style={{background: "#37373f"}}>
                             <CardContent>
-                                <Box>
+                                <div style={{display: "flex", flexWrap: "wrap"}}>
                                 {preschedule.map((cl, i) => (
-                                    <div style={{margin: "5px"}} key={"class-chip-" + i}>
-                                        <Chip label={cl.title + " (" + cl.type + ")"} variant="filled" onDelete={() => removePrescheduleClass(cl)} style={{backgroundColor: "#e2e2e2"}}></Chip>
-                                    </div>
+                                    <Chip key={"class-chip-" + i} label={cl.title+ " " + cl.type} variant="filled" onDelete={() => removePrescheduleClass(cl)} className={styles.chip}></Chip>
                                 ))}
                                 {preschedule.length == 0 && (<div style={{paddingLeft: "5px"}}>
                                     <span style={{fontSize: "8pt", color: "rgba(255, 255, 255, 0.50)"}}>Search your classes to begin</span>
                                 </div>)}
-                                </Box>
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
-                    {false && (<div className={styles.unavailable_time_settings}>
-                        <div style={{marginBottom: "7px"}}>
-                            <label>Unavailable Times:</label>
-                        </div>
-                        <div style={{display: "flex"}}>
-                            <div style={{width: "47.5%", marginRight: "5%"}}>
-                                <TimePicker label="Start Time" sx={{input: {color: "white", background: "#37373f"}}} components={{OpenPickerIcon: "null"}}></TimePicker>
-                            </div>
-                            <div style={{width: "47.5%"}}>
-                                <TimePicker label="End Time" sx={{input: {color: "white", background: "#37373f"}}} components={{OpenPickerIcon: "null"}}></TimePicker>
-                            </div>
-                        </div>
-                        <div style={{display: "flex", marginTop: "10px"}}>
-                            
-                            <Select value={select_unavailable_days} onChange={(e) => {
-                                const nv = e.target.value.filter(j => j != -1);
-                                if (nv.length == 0) nv.push(-1);
-                                setSelectUnavailableDays(nv);
-                            }} id="unavailable-day" multiple={true} sx={{color: "white", background: "#37373f"}}>
-                                <MenuItem value={-1}>Select Days:</MenuItem>
-                                <MenuItem value={0}>Monday</MenuItem>
-                                <MenuItem value={1}>Tuesday</MenuItem>
-                                <MenuItem value={2}>Wednesday</MenuItem>
-                                <MenuItem value={3}>Thursday</MenuItem>
-                                <MenuItem value={4}>Friday</MenuItem>
-                            </Select>
-                        </div>
-                    </div>)}
                     <div style={{marginTop: "15px"}}>
                         <Card style={{backgroundColor: "#37373f", color: "#FFF", padding: "10px"}}>
                             <Typography style={{marginBottom: "7px"}}>Unavailable Times</Typography>
                             <Grid container spacing={2}>
                                 <Grid item xs={6}>
-                                    <TimePicker label="Start Time" sx={{input: {color: "white", background: "#37373f"}}} components={{OpenPickerIcon: "null"}}></TimePicker>
+                                    <TimePicker value={ut_start_input} onChange={(e) => {
+                                        const hour = e["$H"], min = e["$m"];
+                                        if (hour == undefined || min == undefined){
+                                            console.error("Could not retrieve time value!");
+                                            return;
+                                        }
+                                        var model_time = ((hour-8)*12) + (min/5.0);
+                                        if (model_time < 0) model_time = 0;
+                                        else if (model_time > MAX_MODEL_TIME) model_time = MAX_MODEL_TIME;
+
+                                        setUnavailableStart(model_time);
+                                    }} label="Start Time" minutesStep={5} sx={{input: {color: "white", background: "#37373f"}}} components={{OpenPickerIcon: "null"}}></TimePicker>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <TimePicker label="End Time" sx={{input: {color: "white", background: "#37373f"}}} components={{OpenPickerIcon: "null"}}></TimePicker>
+                                    <TimePicker value={ut_end_input} onChange={(e) => {
+                                        console.log(e);
+                                        const hour = e["$H"], min = e["$m"];
+                                        if (hour == undefined || min == undefined){
+                                            console.error("Could not retrieve time value!");
+                                            return;
+                                        }
+                                        var model_time = ((hour-8)*12) + (min/5.0);
+                                        if (model_time < 0) model_time = 0;
+                                        else if (model_time > MAX_MODEL_TIME) model_time = MAX_MODEL_TIME;
+                                        
+                                        console.log("update time 2");
+                                        setUnavailableEnd(model_time);
+                                    }} minutesStep={5} label="End Time" sx={{input: {color: "white", background: "#37373f"}}} components={{OpenPickerIcon: "null"}}></TimePicker>
                                 </Grid>
                                 <Grid item xs={8}>
-                                    <Select value={select_unavailable_days} onChange={(e) => {
+                                    <Select value={ut_days} onChange={(e) => {
                                         const nv = e.target.value.filter(j => j != -1);
                                         if (nv.length == 0) nv.push(-1);
                                         setSelectUnavailableDays(nv);
-                                    }} id="unavailable-day" multiple={true} sx={{color: "white", background: "#37373f", minWidth: "100%", maxWidth: "100%"}}>
+                                    }} required id="unavailable-day" multiple={true} sx={{color: "white", background: "#37373f", minWidth: "100%", maxWidth: "100%", height: "40px"}}>
                                         <MenuItem value={-1}>Select Days:</MenuItem>
                                         <MenuItem value={0}>M</MenuItem>
                                         <MenuItem value={1}>T</MenuItem>
@@ -286,10 +335,54 @@ export default function Index({context}) {
                                 </Grid>
                                 <Grid item xs={4}>
                                     <Box>
-                                        <Button variant="contained" style={{backgroundColor: "#CFB87C"}}>Add</Button>
+                                        <center>
+                                            <Button variant="contained" style={{backgroundColor: "#CFB87C"}} onClick={() => {
+                                                console.log("ut_start = " + ut_start + ", ut_end = " + ut_end + " ut_days = " + JSON.stringify(ut_days));
+                                                if (ut_start == null || isNaN(ut_start) || ut_end == null || isNaN(ut_end) || ut_start == ut_end) return;
+                                                if (ut_days == null || ut_days.length == 0 || ut_days.includes(-1)) return;
+
+                                                const avoid_times = schedule.avoid_times;
+                                                for (let i = 0; i < ut_days.length; i++){
+                                                    var add_new = true;
+                                                    const new_ut = (ut_start < ut_end) ? [ut_start, ut_end] : [ut_end, ut_start];
+                                                    for (let j = 0; j < avoid_times[ut_days[i]].length; j++){
+                                                        const existing_ut = avoid_times[ut_days[i]][j];
+                                                        if (isRangeIntersectionSingle(new_ut, existing_ut)){
+                                                            if (new_ut[0] < existing_ut[0]) {
+                                                                existing_ut[0] = new_ut[0];
+                                                                add_new = false;
+                                                            }
+                                                            if (new_ut[1] > existing_ut[1]){
+                                                                existing_ut[1] = new_ut[1];
+                                                                add_new = false;
+                                                            }
+                                                            if (!add_new) break;
+                                                        }
+                                                    }
+                                                    console.log("day = " + ut_days[i] + ", uts = " + ut_start + ", ute = " + ut_end + ", add_new = " + add_new);
+                                                    if (add_new) avoid_times[ut_days[i]].push(new_ut);
+                                                }
+
+                                                //setUnavailableStart(null);
+                                                //setUnavailableEnd(null);
+                                                console.log("avoid times:");
+                                                console.log(schedule.avoid_times);
+                                                setSelectUnavailableDays([-1]);
+                                                setSchedule({classes: schedule.classes, avoid_times});
+                                            }}>Add</Button>
+                                        </center>
                                     </Box>
                                 </Grid>
                             </Grid>
+                            <div style={{display: "flex", flexWrap: "wrap", marginTop: "8px"}}>
+                                {schedule.avoid_times.map((ut_set, day) => (
+                                    <React.Fragment key={"ut-chip-day-" + day}>
+                                        {ut_set.map((ut, i) => (
+                                            <Chip label={timeString(day, ut[0], ut[1])} key={"ut-chip-" + i} variant="filled" onDelete={()=> {}} className={styles.chip}></Chip>
+                                        ))}
+                                    </React.Fragment>
+                                ))}
+                            </div>
                         </Card>
                     </div>
 

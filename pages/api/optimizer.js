@@ -1,6 +1,7 @@
 import { isRangeIntersection, isSameSchedule } from "lib/utils";
 import solver from "javascript-lp-solver/src/solver";
 import { example_schedule, example_schedule2 } from "../../lib/json/example_schedule";
+import { MAX_MODEL_TIME } from "../../lib/json/consts";
 
 export function randomCost(i){ //basic seeded pseudorandom function
     const n = Math.pow(i + 8, 2)*(100/9.0)*Math.E;
@@ -131,7 +132,7 @@ export default async function handler(req, res){
             let conflicts_avoid_times = false;
             for (let k = 0; k < offering.meeting_times.length; k++){ //for each time class meets in the week
                 const mtime = offering.meeting_times[k];
-                if (mtime.day == undefined || mtime.day < 0 || mtime.day > 4 || mtime.start_time == undefined || mtime.end_time == undefined || mtime.start_time < 0 || mtime.start_time > 140-1 || mtime.end_time <= mtime.start_time || mtime.end_time > 140){
+                if (mtime.day == undefined || mtime.day < 0 || mtime.day > 4 || mtime.start_time == undefined || mtime.end_time == undefined || mtime.start_time < 0 || mtime.start_time > MAX_MODEL_TIME-1 || mtime.end_time <= mtime.start_time || mtime.end_time > MAX_MODEL_TIME){
                     res.status(406).json({error_msg: "Malformatted meeting time in class '" + title + " offering " + j + " meeting time " + k + "! Check that the day, start_time, and end_time are correct."});
                     return;
                 }
@@ -139,7 +140,7 @@ export default async function handler(req, res){
                 if (isRangeIntersection([mtime.start_time, mtime.end_time], avoid_times[mtime.day])) conflicts_avoid_times = true;
                 
                 for (let time_itr = mtime.start_time; time_itr <= mtime.end_time + 1; time_itr++){ //every 5 min chunk in 1 class's meeting
-                    model_var["d" + mtime.day + "-t" + time_itr] = 1; //model time (0-140), also books 5 mins after class ends
+                    model_var["d" + mtime.day + "-t" + time_itr] = 1; //model time (0-MAX_MODEL_TIME), also books 5 mins after class ends
                     model.constraints["d" + mtime.day + "-t" + time_itr] = {min: 0, max: 1};
                 }
             }
