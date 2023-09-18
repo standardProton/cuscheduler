@@ -11,7 +11,7 @@ import styles from "styles/Main.module.css";
 import Image from "next/image";
 import { preschedule_json } from "lib/json/preschedule.js";
 import { example_schedule } from "lib/json/example_schedule.js";
-import {renderScheduleSVG, isRangeIntersectionSingle, timeString } from "lib/utils.js";
+import {renderScheduleSVG, isRangeIntersectionSingle, timeString, UTCount } from "lib/utils.js";
 import { lookup_map } from "lib/json/lookup_map.js";
 import { name_map } from "lib/json/name_map.js";
 import { Card, Box, CardContent, MenuItem, CardActionArea, Typography, Grid, FormHelperText } from "@mui/material";
@@ -42,13 +42,6 @@ export default function Index({context}) {
     const [color_key, setColorKey] = useState({});
     const [ut_create0, setUTCreatorStart] = useState(null);
     const [ut_create1, setUTCreatorEnd] = useState(null);
-
-    //get this outta here
-    const [ut_days, setSelectUnavailableDays] = useState([-1]);
-    const [ut_start, setUnavailableStart] = useState(null);
-    const [ut_start_input, setUnavailableStartInput] = useState({"$H": 8, "$m": 0});
-    const [ut_end, setUnavailableEnd] = useState(null);
-    const [ut_end_input, setUnavailableEndInput] = useState({"$H": 9, "$m": 0});
 
     useEffect(() => {
         if (typeof window == "undefined") return;
@@ -288,93 +281,11 @@ export default function Index({context}) {
                     <div style={{marginTop: "15px"}}>
                         <Card style={{backgroundColor: "#37373f", color: "#FFF", padding: "10px"}}>
                             <Typography style={{marginBottom: "7px"}}>Unavailable Times</Typography>
-                            <Grid container spacing={2}>
-                                <Grid item xs={6}>
-                                    <TimePicker value={ut_start_input} onChange={(e) => {
-                                        const hour = e["$H"], min = e["$m"];
-                                        if (hour == undefined || min == undefined){
-                                            console.error("Could not retrieve time value!");
-                                            return;
-                                        }
-                                        var model_time = ((hour-8)*12) + (min/5.0);
-                                        if (model_time < 0) model_time = 0;
-                                        else if (model_time > MAX_MODEL_TIME) model_time = MAX_MODEL_TIME;
-
-                                        setUnavailableStart(model_time);
-                                    }} label="Start Time" minutesStep={5} sx={{input: {color: "white", background: "#37373f"}}} components={{OpenPickerIcon: "null"}}></TimePicker>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <TimePicker value={ut_end_input} onChange={(e) => {
-                                        console.log(e);
-                                        const hour = e["$H"], min = e["$m"];
-                                        if (hour == undefined || min == undefined){
-                                            console.error("Could not retrieve time value!");
-                                            return;
-                                        }
-                                        var model_time = ((hour-8)*12) + (min/5.0);
-                                        if (model_time < 0) model_time = 0;
-                                        else if (model_time > MAX_MODEL_TIME) model_time = MAX_MODEL_TIME;
-                                        
-                                        console.log("update time 2");
-                                        setUnavailableEnd(model_time);
-                                    }} minutesStep={5} label="End Time" sx={{input: {color: "white", background: "#37373f"}}} components={{OpenPickerIcon: "null"}}></TimePicker>
-                                </Grid>
-                                <Grid item xs={8}>
-                                    <Select value={ut_days} onChange={(e) => {
-                                        const nv = e.target.value.filter(j => j != -1);
-                                        if (nv.length == 0) nv.push(-1);
-                                        setSelectUnavailableDays(nv);
-                                    }} required id="unavailable-day" multiple={true} sx={{color: "white", background: "#37373f", minWidth: "100%", maxWidth: "100%", height: "40px"}}>
-                                        <MenuItem value={-1}>Select Days:</MenuItem>
-                                        <MenuItem value={0}>M</MenuItem>
-                                        <MenuItem value={1}>T</MenuItem>
-                                        <MenuItem value={2}>W</MenuItem>
-                                        <MenuItem value={3}>Th</MenuItem>
-                                        <MenuItem value={4}>F</MenuItem>
-                                    </Select>
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <Box>
-                                        <center>
-                                            <Button variant="contained" style={{backgroundColor: "#CFB87C"}} onClick={() => {
-                                                console.log("ut_start = " + ut_start + ", ut_end = " + ut_end + " ut_days = " + JSON.stringify(ut_days));
-                                                if (ut_start == null || isNaN(ut_start) || ut_end == null || isNaN(ut_end) || ut_start == ut_end) return;
-                                                if (ut_days == null || ut_days.length == 0 || ut_days.includes(-1)) return;
-
-                                                const avoid_times = schedule.avoid_times;
-                                                for (let i = 0; i < ut_days.length; i++){
-                                                    var add_new = true;
-                                                    const new_ut = (ut_start < ut_end) ? [ut_start, ut_end] : [ut_end, ut_start];
-                                                    for (let j = 0; j < avoid_times[ut_days[i]].length; j++){
-                                                        const existing_ut = avoid_times[ut_days[i]][j];
-                                                        if (isRangeIntersectionSingle(new_ut, existing_ut)){
-                                                            if (new_ut[0] < existing_ut[0]) {
-                                                                existing_ut[0] = new_ut[0];
-                                                                add_new = false;
-                                                            }
-                                                            if (new_ut[1] > existing_ut[1]){
-                                                                existing_ut[1] = new_ut[1];
-                                                                add_new = false;
-                                                            }
-                                                            if (!add_new) break;
-                                                        }
-                                                    }
-                                                    console.log("day = " + ut_days[i] + ", uts = " + ut_start + ", ute = " + ut_end + ", add_new = " + add_new);
-                                                    if (add_new) avoid_times[ut_days[i]].push(new_ut);
-                                                }
-
-                                                //setUnavailableStart(null);
-                                                //setUnavailableEnd(null);
-                                                console.log("avoid times:");
-                                                console.log(schedule.avoid_times);
-                                                setSelectUnavailableDays([-1]);
-                                                setSchedule({classes: schedule.classes, avoid_times});
-                                            }}>Add</Button>
-                                        </center>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                            <div style={{display: "flex", flexWrap: "wrap", marginTop: "8px"}}>
+                            {UTCount(schedule.avoid_times) == 0 ? (
+                            <div style={{paddingLeft: "5px"}}>
+                                <span style={{fontSize: "8pt", color: "rgba(255, 255, 255, 0.50)"}}>Click on the schedule to add a time</span>
+                            </div>) : 
+                            (<div style={{display: "flex", flexWrap: "wrap", marginTop: "8px"}}>
                                 {schedule.avoid_times.map((ut_set, day) => (
                                     <React.Fragment key={"ut-chip-day-" + day}>
                                         {ut_set.map((ut, i) => (
@@ -382,7 +293,7 @@ export default function Index({context}) {
                                         ))}
                                     </React.Fragment>
                                 ))}
-                            </div>
+                            </div>)}
                         </Card>
                     </div>
 
