@@ -59,7 +59,8 @@ export default function Index({context}) {
 
             const options = {
                 ut_start: ut_create0,
-                ut_end: ut_create1
+                ut_end: ut_create1,
+                scheduleClickUp: (x, y) => scheduleClick(x, y, true)
             }
 
             console.log(options);
@@ -129,21 +130,19 @@ export default function Index({context}) {
 
     }, [schedule, preschedule, ut_create0, ut_create1, context]);
 
-    function scheduleClick(day, time){
-        if (ut_create0 == null){
+    function scheduleClick(day, time, is_upclick){
+        if (ut_create0 == null && !is_upclick){
             setUTCreatorStart([day, time]);
         } else if (ut_create1 != null) {
             const avoid_times = schedule.avoid_times;
             for (let i = Math.min(ut_create0[0], ut_create1[0]); i <= Math.max(ut_create0[0], ut_create1[0]); i++){
                 var add_new = true;
                 const new_ut = [Math.min(ut_create0[1], ut_create1[1]), Math.max(ut_create0[1], ut_create1[1])];
-                const day = i;
-                console.log("i = " + i);
 
                 if (day > 4) continue;
 
-                for (let j = 0; j < avoid_times[day].length; j++){
-                    const existing_ut = avoid_times[day][j];
+                for (let j = 0; j < avoid_times[i].length; j++){
+                    const existing_ut = avoid_times[i][j];
                     if (isRangeIntersectionSingle(new_ut, existing_ut)){
                         if (new_ut[0] < existing_ut[0]) {
                             existing_ut[0] = new_ut[0];
@@ -153,19 +152,15 @@ export default function Index({context}) {
                             existing_ut[1] = new_ut[1];
                             add_new = false;
                         }
-                        if (new_ut[0] > existing_ut[0] && new_ut[1] < existing_ut[1]) add_new = false;
+                        if (new_ut[0] >= existing_ut[0] && new_ut[1] <= existing_ut[1]) add_new = false;
                         if (!add_new) break;
                     }
                 }
-                //console.log("day = " + ut_days[i] + ", uts = " + ut_start + ", ute = " + ut_end + ", add_new = " + add_new);
-                if (add_new) avoid_times[day].push(new_ut);
+                if (add_new) avoid_times[i].push(new_ut);
             }
 
-            //console.log("avoid times:");
-            //console.log(schedule.avoid_times);
             setUTCreatorStart(null);
             setUTCreatorEnd(null);
-            //setSelectUnavailableDays([-1]);
             setSchedule({classes: schedule.classes, avoid_times});
         }
     }

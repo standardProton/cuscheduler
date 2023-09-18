@@ -18,7 +18,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     height: 100vh;
-    cursor: crosshair;
 }
 
 .shadow{ /*4, 8, 6, 20*/
