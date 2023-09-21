@@ -42,6 +42,8 @@ export default function Index({context}) {
     const [color_key, setColorKey] = useState({});
     const [ut_create0, setUTCreatorStart] = useState(null);
     const [ut_create1, setUTCreatorEnd] = useState(null);
+    const [full_schedule_set, setFullScheduleSet] = useState([[]]);
+    const [full_schedule_index, setSelectedScheduleIndex] = useState(0);
 
     useEffect(() => {
         if (typeof window == "undefined") return;
@@ -62,8 +64,6 @@ export default function Index({context}) {
                 ut_end: ut_create1,
                 scheduleClickUp: (x, y) => scheduleClick(x, y, true)
             }
-
-            console.log(options);
     
             //console.log("Update");
             setScheduleSVG(renderScheduleSVG(width, window.innerHeight-4, schedule, color_key, setColorKey, scheduleClick, scheduleHover, options));
@@ -141,6 +141,9 @@ export default function Index({context}) {
 
                 if (day > 4) continue;
 
+                const remove_indexes = [];
+                console.log("--");
+                console.log(avoid_times[i]);
                 for (let j = 0; j < avoid_times[i].length; j++){
                     const existing_ut = avoid_times[i][j];
                     if (isRangeIntersectionSingle(new_ut, existing_ut)){
@@ -156,6 +159,7 @@ export default function Index({context}) {
                         if (!add_new) break;
                     }
                 }
+
                 if (add_new) avoid_times[i].push(new_ut);
             }
 
@@ -230,6 +234,8 @@ export default function Index({context}) {
         if (res1.status == 200 && res.schedules != undefined){
             const s = {classes: res.schedules[0].classes};
             s.avoid_times = schedule.avoid_times;
+            setFullScheduleSet(res.schedules);
+            setSelectedScheduleIndex(0);
             setSchedule(s);
 
             if (res.conflictions == 0) setStatusText("✅ Created schedule");
@@ -284,7 +290,11 @@ export default function Index({context}) {
                                 {schedule.avoid_times.map((ut_set, day) => (
                                     <React.Fragment key={"ut-chip-day-" + day}>
                                         {ut_set.map((ut, i) => (
-                                            <Chip label={timeString(day, ut[0], ut[1])} key={"ut-chip-" + i} variant="filled" onDelete={()=> {}} className={styles.chip}></Chip>
+                                            <Chip label={timeString(day, ut[0], ut[1])} key={"ut-chip-" + i} variant="filled" onDelete={()=> {
+                                                const ut_list = schedule.avoid_times;
+                                                ut_list[day].splice(i, 1);
+                                                setSchedule({classes: schedule.classes, avoid_times: ut_list});
+                                            }} className={styles.chip}></Chip>
                                         ))}
                                     </React.Fragment>
                                 ))}
@@ -292,14 +302,13 @@ export default function Index({context}) {
                         </Card>
                     </div>
 
-
-                    <div style={{position: "absolute", bottom: "10px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
+                </div>
+                <div className={styles.menu1_submit}>
+                    <div style={{position: "absolute", top: "-30px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
                         <center>
                             <span><b>{status_message}</b></span>
                         </center>
                     </div>
-                </div>
-                <div className={styles.menu1_submit}>
                     {loading && (<div style={{marginTop: "6px", marginRight: "10px"}}>
                         <Image src="/loading.gif" width="32" height="32" alt="Loading"></Image>
                     </div>)}
@@ -307,7 +316,12 @@ export default function Index({context}) {
                 </div>
             </div>
             <div className={styles.schedule_container}>
-                {schedule_svg}
+                <div>
+                    
+                </div>
+                <div>
+                    {schedule_svg}
+                </div>
             </div>
         </div>
         </>

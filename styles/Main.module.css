@@ -18,6 +18,8 @@
     overflow-y: auto;
     overflow-x: hidden;
     height: 100vh;
+    display: flex;
+    flex-wrap: nowrap;
 }
 
 .shadow{ /*4, 8, 6, 20*/
@@ -25,9 +27,8 @@
 }
 
 .menu1_settings{
-    min-height: calc(100vh - 65px - 20px);
+    height: calc(100vh - 65px - 20px);
     padding: 10px;
-    position: relative;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -35,6 +36,7 @@
 .menu1_submit{
     min-height: 45px;
     padding: 10px;
+    position: relative;
     box-shadow: 0px 4px 6px 10px rgba(0, 0, 0, 0.2), 0px 4px 6px 10px rgba(0, 0, 0, 0.19);
     align-items: right;
     text-align: right;

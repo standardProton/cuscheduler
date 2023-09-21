@@ -164,7 +164,10 @@ export default async function handler(req, res){
         var duplicate = false;
 
         for (let j = 0; j < schedules.length; j++){
-            if (isSameSchedule(schedules[j], solved)) duplicate = true;
+            if (isSameSchedule(schedules[j], solved)) {
+                duplicate = true;
+                break;
+            }
         }
         if (!duplicate){
             if (!solved.feasible) console.log("INFEASIBLE");
