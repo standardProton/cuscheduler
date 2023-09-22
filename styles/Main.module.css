@@ -76,6 +76,18 @@
     font-size: 8pt;
 }
 
+.full_schedule_select_number{
+    width: 35px;
+    height: 30px;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: ease-in-out background-color 150ms;
+}
+.full_schedule_select_number:hover{
+    background-color: #37373f !important;
+}
+
 /*.avoid_hours{
     fill: #ff9429;
     fill-opacity: 0.30;

@@ -38,12 +38,13 @@ export default function Index({context}) {
         classes: [],
         avoid_times: [[], [], [], [], []]
     });
+    const [submitted, setSubmitted] = useState(false);
     const [class_suggestions, setClassSuggestions] = useState([]);
     const [color_key, setColorKey] = useState({});
     const [ut_create0, setUTCreatorStart] = useState(null);
     const [ut_create1, setUTCreatorEnd] = useState(null);
     const [full_schedule_set, setFullScheduleSet] = useState([[]]);
-    const [full_schedule_index, setSelectedScheduleIndex] = useState(0);
+    const [selected_schedule_index, setSelectedScheduleIndex] = useState(0);
 
     useEffect(() => {
         if (typeof window == "undefined") return;
@@ -58,6 +59,7 @@ export default function Index({context}) {
                 else if (percent > css_max) width = window.innerWidth - css_max;
                 else width = window.innerWidth*(1-css_percentage);
             }
+            if (submitted) width -= 55;
 
             const options = {
                 ut_start: ut_create0,
@@ -128,7 +130,7 @@ export default function Index({context}) {
             search_box.removeEventListener("input", searchBoxType);
         }
 
-    }, [schedule, preschedule, ut_create0, ut_create1, context]);
+    }, [schedule, preschedule, ut_create0, ut_create1, context, submitted]);
 
     function scheduleClick(day, time, is_upclick){
         if (ut_create0 == null && !is_upclick){
@@ -237,6 +239,7 @@ export default function Index({context}) {
             setFullScheduleSet(res.schedules);
             setSelectedScheduleIndex(0);
             setSchedule(s);
+            setSubmitted(true);
 
             if (res.conflictions == 0) setStatusText("✅ Created schedule");
             else setStatusText("❌ Could not fit " + res.conflictions + " class" + (res.conflictions == 1 ? "" : "es") + " into schedule!")
@@ -316,9 +319,16 @@ export default function Index({context}) {
                 </div>
             </div>
             <div className={styles.schedule_container}>
-                <div>
-                    
-                </div>
+                {submitted && (<div>
+                    {full_schedule_set.map((schedule_set, i) => (
+                        <div key={"schedule-number-" + i} style={selected_schedule_index == i ? {borderRight: "4px solid #FFF", backgroundColor: "#2c2c34"} : {}} className={styles.full_schedule_select_number} onClick={() => {
+                            setSchedule({avoid_times: schedule.avoid_times, classes: full_schedule_set[i].classes});
+                            setSelectedScheduleIndex(i);
+                        }}>
+                            <span><b>{i+1}</b></span>
+                        </div>
+                    ))}
+                </div>)}
                 <div>
                     {schedule_svg}
                 </div>

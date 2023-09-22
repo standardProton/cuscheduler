@@ -93,7 +93,7 @@ export default async function handler(req, res){
         return;
     }
 
-    const premium = false;
+    const premium = true;
 
     const min_enroll_count = data.min_enroll_count == undefined ? preschedule.length : Math.min(data.min_enroll_count, preschedule.length);
     const model = {
@@ -158,7 +158,7 @@ export default async function handler(req, res){
     const schedules = [], start = (new Date()).getTime();
 
     var random_itr = 0;
-    while (schedules.length < 10 && random_itr < 20){
+    while (schedules.length < 10 && random_itr < (premium ? 30 : 20)){
         const solved = await solve(model, preschedule, random_itr);
 
         var duplicate = false;
@@ -178,6 +178,9 @@ export default async function handler(req, res){
 
     console.log("Took " + ((new Date()).getTime() - start) + "ms");
     console.log(schedules.length + " unique schedules");
+
+    const possible_length = schedules.length;
+    if (!premium) schedules.splice(2, schedules.length);
 
     //res.status(200).json({conflictions: solved.feasible ? 0 : min_enroll_count - solved.final_schedule.length, final_schedule: solved.final_schedule});
     res.status(200).json({conflictions: 0, schedule_count: schedules.length, schedules});
