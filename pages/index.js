@@ -39,6 +39,7 @@ export default function Index({context}) {
         avoid_times: [[], [], [], [], []]
     });
     const [submitted, setSubmitted] = useState(false);
+    const [await_submit, setAwaitSubmit] = useState(false);
     const [class_suggestions, setClassSuggestions] = useState([]);
     const [color_key, setColorKey] = useState({});
     const [ut_create0, setUTCreatorStart] = useState(null);
@@ -48,6 +49,11 @@ export default function Index({context}) {
 
     useEffect(() => {
         if (typeof window == "undefined") return;
+
+        if (await_submit){
+            submit();
+            setAwaitSubmit(false);
+        }
 
         function update(){
             var width = window.innerWidth;
@@ -143,9 +149,7 @@ export default function Index({context}) {
 
                 if (day > 4) continue;
 
-                const remove_indexes = [];
-                console.log("--");
-                console.log(avoid_times[i]);
+                const remove_indexes = []; //TODO
                 for (let j = 0; j < avoid_times[i].length; j++){
                     const existing_ut = avoid_times[i][j];
                     if (isRangeIntersectionSingle(new_ut, existing_ut)){
@@ -165,9 +169,11 @@ export default function Index({context}) {
                 if (add_new) avoid_times[i].push(new_ut);
             }
 
+           // setAwaitSubmit(true);
             setUTCreatorStart(null);
             setUTCreatorEnd(null);
             setSchedule({classes: schedule.classes, avoid_times});
+            submit();
         }
     }
     function scheduleHover(day, time){
@@ -202,7 +208,8 @@ export default function Index({context}) {
 
         setPreSchedule(preschedule);
         //update(window, preschedule);
-        setLoading(false);
+        //setLoading(false);
+        submit();
         document.getElementById("class-search").value = "";
 
     }
@@ -212,14 +219,19 @@ export default function Index({context}) {
         for (let j = 0; j < preschedule.length; j++) {
             if (preschedule[j].title != cl.title || preschedule[j].type != cl.type) nps.push(preschedule[j]);
         }
-        delete color_key[cl.title];
-        setColorKey(color_key);
+        //delete color_key[cl.title];
+        //setColorKey(color_key);
+        setAwaitSubmit(true);
         setPreSchedule(nps);
+        //submit();
     }
 
     async function submit(){
         if (loading) return;
-        if (preschedule == null || preschedule.length == 0) return;
+        if (preschedule == null || preschedule.length == 0) {
+            setSchedule({classes: [], avoid_times: schedule.avoid_times});
+            return;
+        }
         setLoading(true);
 
         const res1 = await fetch("/api/optimizer", {
@@ -284,7 +296,7 @@ export default function Index({context}) {
                     </div>
                     <div style={{marginTop: "15px"}}>
                         <Card style={{backgroundColor: "#37373f", color: "#FFF", padding: "10px"}}>
-                            <Typography style={{marginBottom: "7px"}}>Unavailable Times</Typography>
+                            <Typography style={{marginBottom: "7px"}}>Avoid Times</Typography>
                             {UTCount(schedule.avoid_times) == 0 ? (
                             <div style={{paddingLeft: "5px"}}>
                                 <span style={{fontSize: "8pt", color: "rgba(255, 255, 255, 0.50)"}}>Click on the schedule to add a time</span>
@@ -296,6 +308,7 @@ export default function Index({context}) {
                                             <Chip label={timeString(day, ut[0], ut[1])} key={"ut-chip-" + i} variant="filled" onDelete={()=> {
                                                 const ut_list = schedule.avoid_times;
                                                 ut_list[day].splice(i, 1);
+                                                setAwaitSubmit(true);
                                                 setSchedule({classes: schedule.classes, avoid_times: ut_list});
                                             }} className={styles.chip}></Chip>
                                         ))}
@@ -307,7 +320,7 @@ export default function Index({context}) {
 
                 </div>
                 <div className={styles.menu1_submit}>
-                    <div style={{position: "absolute", top: "-30px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
+                    {false && (<><div style={{position: "absolute", top: "-30px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
                         <center>
                             <span><b>{status_message}</b></span>
                         </center>
@@ -316,6 +329,15 @@ export default function Index({context}) {
                         <Image src="/loading.gif" width="32" height="32" alt="Loading"></Image>
                     </div>)}
                     <Button variant={loading ? "disabled" : "contained"} onClick={submit} style={{backgroundColor: "#CFB87C"}}>OPTIMIZE</Button>
+                    </>)}
+                    <center>
+                        {loading ? (<div style={{marginTop: "6px", marginRight: "10px"}}>
+                            <Image src="/loading.gif" width="32" height="32" alt="Loading"></Image>
+                        </div>) : 
+                        (<div style={{marginTop: "10px"}}>
+                            <b>{status_message}</b>
+                        </div>)}
+                    </center>
                 </div>
             </div>
             <div className={styles.schedule_container}>
