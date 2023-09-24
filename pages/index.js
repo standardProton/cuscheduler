@@ -203,7 +203,9 @@ export default function Index({context}) {
                 if (add) preschedule.push(preschedule_add[i]);
             }
         } else {
-            setStatusText("Could not find this class!");
+            setStatusText("❌ Could not find this class!");
+            setLoading(false);
+            return;
         }
 
         setPreSchedule(preschedule);
@@ -230,6 +232,9 @@ export default function Index({context}) {
         if (loading) return;
         if (preschedule == null || preschedule.length == 0) {
             setSchedule({classes: [], avoid_times: schedule.avoid_times});
+            setFullScheduleSet([[]]);
+            setSelectedScheduleIndex(0);
+            setSubmitted(false);
             return;
         }
         setLoading(true);

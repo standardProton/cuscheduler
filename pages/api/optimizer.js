@@ -107,12 +107,25 @@ export default async function handler(req, res){
             ints: {}
         }
 
-        let cost_count = 0;
-        for (let i = 0; i < preschedule.length; i++){ //each class to be scheduled
+        //preprocess preschedule data
+        let quarterly_classes = false; //any abnormal start/end dates
+        for (let i = 0; i < preschedule.length; i++){
             if (preschedule[i].title == undefined || preschedule[i].offerings == undefined || preschedule[i].offerings.length == 0){
                 res.status(406).json({error_msg: "Malformatted preschedule object (Index " + i + ")"});
                 return;
             }
+            for (let j = 0; j < Math.min(preschedule[i].offerings.length, 65); j++){
+                const qu = preschedule[i].offerings[j].quarter;
+                if (qu != null && qu > 0) {
+                    quarterly_classes = true;
+                    break;
+                }
+            }
+        }
+
+        let cost_count = 0;
+        for (let i = 0; i < preschedule.length; i++){ //each class to be scheduled
+
             const title = preschedule[i].title.toUpperCase();
 
             model.constraints["c" + i + "-enrolled"] = {min: 0, max: 1};
