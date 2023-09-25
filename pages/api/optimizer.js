@@ -108,7 +108,7 @@ export default async function handler(req, res){
         }
 
         //preprocess preschedule data
-        let quarterly_classes = false; //any abnormal start/end dates
+        let quarters = null; //null if all classes fit whole semester, otherwise max # of quarters
         for (let i = 0; i < preschedule.length; i++){
             if (preschedule[i].title == undefined || preschedule[i].offerings == undefined || preschedule[i].offerings.length == 0){
                 res.status(406).json({error_msg: "Malformatted preschedule object (Index " + i + ")"});
@@ -117,11 +117,15 @@ export default async function handler(req, res){
             for (let j = 0; j < Math.min(preschedule[i].offerings.length, 65); j++){
                 const qu = preschedule[i].offerings[j].quarter;
                 if (qu != null && qu > 0) {
-                    quarterly_classes = true;
+                    if (quarters == null) quarters = qu;
+                    else if (qu > quarters) quarters = qu;
+
                     break;
                 }
             }
         }
+
+        console.log("quarter max = " + quarters);
 
         let cost_count = 0;
         for (let i = 0; i < preschedule.length; i++){ //each class to be scheduled
@@ -154,8 +158,20 @@ export default async function handler(req, res){
                     if (isRangeIntersection([mtime.start_time, mtime.end_time], avoid_times[mtime.day])) ut_count++;
                     
                     for (let time_itr = mtime.start_time; time_itr <= mtime.end_time + 1; time_itr++){ //every 5 min chunk in 1 class's meeting
-                        model_var["d" + mtime.day + "-t" + time_itr] = 1; //model time (0-MAX_MODEL_TIME), also books 5 mins after class ends
-                        model.constraints["d" + mtime.day + "-t" + time_itr] = {min: 0, max: 1};
+                        if (offering.quarter != null){ //quarterly class
+                            model_var["d" + mtime.day + "-t" + time_itr + "-q" + offering.quarter] = 1; //model time (0-MAX_MODEL_TIME), also books 5 mins after class ends
+                            model.constraints["d" + mtime.day + "-t" + time_itr + "-q" + offering.quarter] = {min: 0, max: 1};
+                        } else {
+                            if (quarters == null){ //no quarters to consider for any class
+                                model_var["d" + mtime.day + "-t" + time_itr] = 1; 
+                                model.constraints["d" + mtime.day + "-t" + time_itr] = {min: 0, max: 1};
+                            } else {
+                                for (let qi = 0; qi <= quarters; qi++){ //not a quarterly class, takes all quarters in semester
+                                    model_var["d" + mtime.day + "-t" + time_itr + "-q" + qi] = 1; 
+                                    model.constraints["d" + mtime.day + "-t" + time_itr + "-q" + qi] = {min: 0, max: 1};
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -167,7 +183,7 @@ export default async function handler(req, res){
         }
 
         
-        //console.log(model);
+        //console.log(model.variables);
 
         const schedules = [], start = (new Date()).getTime();
 

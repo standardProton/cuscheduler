@@ -17,6 +17,7 @@ import { name_map } from "lib/json/name_map.js";
 import { Card, Box, CardContent, MenuItem, CardActionArea, Typography, Grid, FormHelperText } from "@mui/material";
 import { MAX_MODEL_TIME } from "../lib/json/consts";
 import React from "react";
+import Popup from "../comps/Popup";
 
 export async function getServerSideProps(context){
     return {
@@ -47,6 +48,8 @@ export default function Index({context}) {
     const [full_schedule_set, setFullScheduleSet] = useState([[]]);
     const [selected_schedule_index, setSelectedScheduleIndex] = useState(0);
 
+    const [checklist_visible, setChecklistVisible] = useState(false);
+
     useEffect(() => {
         if (typeof window == "undefined") return;
 
@@ -70,7 +73,8 @@ export default function Index({context}) {
             const options = {
                 ut_start: ut_create0,
                 ut_end: ut_create1,
-                scheduleClickUp: (x, y) => scheduleClick(x, y, true)
+                scheduleClickUp: (x, y) => scheduleClick(x, y, true),
+                //scheduleClick: (x, y) => {if (window.innerWidth <= 750) scheduleClick(x, y, false)}
             }
     
             //console.log("Update");
@@ -138,8 +142,14 @@ export default function Index({context}) {
 
     }, [schedule, preschedule, ut_create0, ut_create1, context, submitted]);
 
+    useEffect(() => {
+        if (ut_create1 != null && window.innerWidth < 750){
+            scheduleClick(ut_create1[0], ut_create1[1]);
+        }
+    }, [ut_create1]);
+
     function scheduleClick(day, time, is_upclick){
-        if (ut_create0 == null && !is_upclick){
+        if (ut_create0 == null && (!is_upclick || window.innerWidth < 750) && UTCount(schedule.avoid_times) < 20){
             setUTCreatorStart([day, time]);
         } else if (ut_create1 != null) {
             const avoid_times = schedule.avoid_times;
@@ -169,7 +179,6 @@ export default function Index({context}) {
                 if (add_new) avoid_times[i].push(new_ut);
             }
 
-           // setAwaitSubmit(true);
             setUTCreatorStart(null);
             setUTCreatorEnd(null);
             setSchedule({classes: schedule.classes, avoid_times});
@@ -325,24 +334,26 @@ export default function Index({context}) {
 
                 </div>
                 <div className={styles.menu1_submit}>
-                    {false && (<><div style={{position: "absolute", top: "-30px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
+                    {true && (<><div style={{position: "absolute", top: "-30px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
                         <center>
                             <span><b>{status_message}</b></span>
                         </center>
                     </div>
+                    
                     {loading && (<div style={{marginTop: "6px", marginRight: "10px"}}>
                         <Image src="/loading.gif" width="32" height="32" alt="Loading"></Image>
                     </div>)}
-                    <Button variant={loading ? "disabled" : "contained"} onClick={submit} style={{backgroundColor: "#CFB87C"}}>OPTIMIZE</Button>
+                    <Button variant={loading ? "disabled" : "contained"} onClick={() => setChecklistVisible(true)} style={{backgroundColor: "#CFB87C"}}>SHOW CHECKLIST</Button>
                     </>)}
-                    <center>
+                    
+                    {false && (<center>
                         {loading ? (<div style={{marginTop: "6px", marginRight: "10px"}}>
                             <Image src="/loading.gif" width="32" height="32" alt="Loading"></Image>
                         </div>) : 
                         (<div style={{marginTop: "10px"}}>
                             <b>{status_message}</b>
                         </div>)}
-                    </center>
+                    </center>)}
                 </div>
             </div>
             <div className={styles.schedule_container}>
@@ -361,6 +372,9 @@ export default function Index({context}) {
                 </div>
             </div>
         </div>
+        <Popup setVisible={setChecklistVisible} visible={checklist_visible}>
+            Test popup
+        </Popup>
         </>
     );
 }
