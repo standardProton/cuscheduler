@@ -163,6 +163,10 @@
     overflow-y: auto;
 }
 
+.checklist_element{
+    margin-bottom: 30px;
+}
+
 @media (max-width: 750px){
     .schedule_container{
         overflow-x: auto;

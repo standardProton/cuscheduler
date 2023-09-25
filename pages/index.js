@@ -1,21 +1,18 @@
 
 import Head from "next/head.js";
-import { CUtoModelTime, ModelToCUTime, getPreScheduleClass } from "lib/cu_utils.js";
+import { getPreScheduleClass } from "lib/cu_utils.js";
 import { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import Chip from "@mui/material/Chip";
-import Select from "@mui/material/Select";
 import styles from "styles/Main.module.css";
 import Image from "next/image";
 import { preschedule_json } from "lib/json/preschedule.js";
 import { example_schedule } from "lib/json/example_schedule.js";
-import {renderScheduleSVG, isRangeIntersectionSingle, timeString, UTCount } from "lib/utils.js";
+import {renderScheduleSVG, isRangeIntersectionSingle, timeString, UTCount, groupScheduleClasses } from "lib/utils.js";
 import { lookup_map } from "lib/json/lookup_map.js";
 import { name_map } from "lib/json/name_map.js";
-import { Card, Box, CardContent, MenuItem, CardActionArea, Typography, Grid, FormHelperText } from "@mui/material";
-import { MAX_MODEL_TIME } from "../lib/json/consts";
+import { Card, Checkbox, FormControlLabel, CardContent, MenuItem, CardActionArea, Typography, Grid, FormHelperText } from "@mui/material";
 import React from "react";
 import Popup from "../comps/Popup";
 
@@ -102,7 +99,6 @@ export default function Index({context}) {
                 setClassSuggestions([]);
                 return;
             }
-
             const word_split = t.split(" ");
 
             if (word_split.length >= 2){
@@ -343,7 +339,7 @@ export default function Index({context}) {
                     {loading && (<div style={{marginTop: "6px", marginRight: "10px"}}>
                         <Image src="/loading.gif" width="32" height="32" alt="Loading"></Image>
                     </div>)}
-                    <Button variant={loading ? "disabled" : "contained"} onClick={() => setChecklistVisible(true)} style={{backgroundColor: "#CFB87C"}}>SHOW CHECKLIST</Button>
+                    <Button variant={(loading || schedule.classes.length == 0) ? "disabled" : "contained"} onClick={() => setChecklistVisible(true)} style={{backgroundColor: "#CFB87C"}}>SHOW CHECKLIST</Button>
                     </>)}
                     
                     {false && (<center>
@@ -373,7 +369,19 @@ export default function Index({context}) {
             </div>
         </div>
         <Popup setVisible={setChecklistVisible} visible={checklist_visible}>
-            Test popup
+            <div className={styles.checklist_container}>
+            {groupScheduleClasses(schedule.classes).map(checklist => (
+                <div className={styles.checklist_element}>
+                    <span style={{fontSize: "18pt"}}><b>{checklist.title}</b></span>
+                    <div>
+                        {checklist.sections.map(section => (
+                            <FormControlLabel label={<Typography variant="label2">{"Section " + section}</Typography>} control = {
+                            <Checkbox size="large" sx={{color: "white"}}></Checkbox>}></FormControlLabel>
+                        ))}
+                    </div>
+                </div>
+            ))}
+            </div>
         </Popup>
         </>
     );
