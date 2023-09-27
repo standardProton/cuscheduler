@@ -125,8 +125,6 @@ export default async function handler(req, res){
             }
         }
 
-        console.log("quarter max = " + quarters);
-
         let cost_count = 0;
         for (let i = 0; i < preschedule.length; i++){ //each class to be scheduled
 
@@ -207,7 +205,6 @@ export default async function handler(req, res){
         }
 
         console.log("Took " + ((new Date()).getTime() - start) + "ms");
-        console.log(schedules.length + " unique schedules");
 
         const possible_length = schedules.length;
         if (!premium) schedules.splice(2, schedules.length);

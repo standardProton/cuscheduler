@@ -71,10 +71,8 @@ export default function Index({context}) {
                 ut_start: ut_create0,
                 ut_end: ut_create1,
                 scheduleClickUp: (x, y) => scheduleClick(x, y, true),
-                //scheduleClick: (x, y) => {if (window.innerWidth <= 750) scheduleClick(x, y, false)}
             }
     
-            //console.log("Update");
             setScheduleSVG(renderScheduleSVG(width, window.innerHeight-4, schedule, color_key, setColorKey, scheduleClick, scheduleHover, options));
         }
 
@@ -376,7 +374,7 @@ export default function Index({context}) {
                     <div>
                         {checklist.sections.map(section => (
                             <FormControlLabel label={<Typography variant="label2">{"Section " + section}</Typography>} control = {
-                            <Checkbox size="large" sx={{color: "white"}}></Checkbox>}></FormControlLabel>
+                            <Checkbox size="medium" sx={{color: "white"}}></Checkbox>}></FormControlLabel>
                         ))}
                     </div>
                 </div>
