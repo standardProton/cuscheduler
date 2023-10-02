@@ -77,6 +77,10 @@
     font-size: 8pt;
 }
 
+.chip_red{
+    background-color: #f05b5b !important;
+}
+
 .full_schedule_select_number{
     width: 35px;
     height: 30px;

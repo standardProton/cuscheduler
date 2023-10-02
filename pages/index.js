@@ -9,7 +9,7 @@ import styles from "styles/Main.module.css";
 import Image from "next/image";
 import { preschedule_json } from "lib/json/preschedule.js";
 import { example_schedule } from "lib/json/example_schedule.js";
-import {renderScheduleSVG, isRangeIntersectionSingle, timeString, UTCount, groupScheduleClasses } from "lib/utils.js";
+import {renderScheduleSVG, isRangeIntersectionSingle, timeString, UTCount, groupScheduleClasses, prescheduleClassCount } from "lib/utils.js";
 import { lookup_map } from "lib/json/lookup_map.js";
 import { name_map } from "lib/json/name_map.js";
 import { Card, Checkbox, FormControlLabel, CardContent, MenuItem, CardActionArea, Typography, Grid, FormHelperText } from "@mui/material";
@@ -44,6 +44,7 @@ export default function Index({context}) {
     const [ut_create1, setUTCreatorEnd] = useState(null);
     const [full_schedule_set, setFullScheduleSet] = useState([[]]);
     const [selected_schedule_index, setSelectedScheduleIndex] = useState(0);
+    const [conflict_class, setConflictingClass] = useState(null);
 
     const [checklist_visible, setChecklistVisible] = useState(false);
 
@@ -195,6 +196,10 @@ export default function Index({context}) {
 
         const preschedule_add = await getPreScheduleClass(class_code.toUpperCase(), context.cors_anywhere);
         if (preschedule_add != null) {
+            if (preschedule_add.length == prescheduleClassCount(preschedule, class_code)) {
+                setLoading(false);
+                return;
+            }
             for (let i = 0; i < preschedule_add.length; i++){
                 var add = true;
                 for (let j = 0; j < preschedule.length; j++){
@@ -214,7 +219,7 @@ export default function Index({context}) {
         setPreSchedule(preschedule);
         //update(window, preschedule);
         //setLoading(false);
-        submit();
+        submit(class_code);
         document.getElementById("class-search").value = "";
 
     }
@@ -228,10 +233,9 @@ export default function Index({context}) {
         //setColorKey(color_key);
         setAwaitSubmit(true);
         setPreSchedule(nps);
-        //submit();
     }
 
-    async function submit(){
+    async function submit(lastAddedClass){
         if (loading) return;
         if (preschedule == null || preschedule.length == 0) {
             setSchedule({classes: [], avoid_times: schedule.avoid_times});
@@ -254,15 +258,27 @@ export default function Index({context}) {
         setLoading(false);
 
         if (res1.status == 200 && res.schedules != undefined){
-            const s = {classes: res.schedules[0].classes};
-            s.avoid_times = schedule.avoid_times;
-            setFullScheduleSet(res.schedules);
-            setSelectedScheduleIndex(0);
-            setSchedule(s);
-            setSubmitted(true);
 
-            if (res.conflictions == 0) setStatusText("✅ Created schedule");
-            else setStatusText("❌ Could not fit " + res.conflictions + " class" + (res.conflictions == 1 ? "" : "es") + " into schedule!")
+            if (!res.conflictions) {
+                const s = {classes: res.schedules[0].classes};
+                s.avoid_times = schedule.avoid_times;
+                setFullScheduleSet(res.schedules);
+                setSelectedScheduleIndex(0);
+                setSchedule(s);
+                setSubmitted(true);
+                setStatusText("✅ Created schedule");
+
+                if (conflict_class != null){
+                    if (prescheduleClassCount(preschedule, conflict_class) == 0) setConflictingClass(null);
+                }
+
+            } else {
+                setStatusText("❌ Impossible to fit this class!");
+                setSubmitted(false);
+                setSchedule({classes: [], avoid_times: schedule.avoid_times});
+                setConflictingClass(lastAddedClass);
+                if (lastAddedClass != null) setConflictingClass(lastAddedClass.toUpperCase());
+            }
         } else {
             console.error(res.error_msg);
             setStatusText("❌ There was an error!");
@@ -293,7 +309,7 @@ export default function Index({context}) {
                             <CardContent>
                                 <div style={{display: "flex", flexWrap: "wrap"}}>
                                 {preschedule.map((cl, i) => (
-                                    <Chip key={"class-chip-" + i} label={cl.title+ " " + cl.type} variant="filled" onDelete={() => removePrescheduleClass(cl)} className={styles.chip}></Chip>
+                                    <Chip key={"class-chip-" + i} label={cl.title+ " " + cl.type} variant="filled" onDelete={() => removePrescheduleClass(cl)} className={styles.chip + ((conflict_class != null && conflict_class.toLowerCase() == cl.title.toLowerCase()) ? " " + styles.chip_red : "")}></Chip>
                                 ))}
                                 {preschedule.length == 0 && (<div style={{paddingLeft: "5px"}}>
                                     <span style={{fontSize: "8pt", color: "rgba(255, 255, 255, 0.50)"}}>Search your classes to begin</span>
@@ -368,6 +384,7 @@ export default function Index({context}) {
         </div>
         <Popup setVisible={setChecklistVisible} visible={checklist_visible}>
             <div className={styles.checklist_container}>
+                <div style={{marginBottom: "20px"}}>Registration Checklist:</div>
             {groupScheduleClasses(schedule.classes).map(checklist => (
                 <div className={styles.checklist_element}>
                     <span style={{fontSize: "18pt"}}><b>{checklist.title}</b></span>

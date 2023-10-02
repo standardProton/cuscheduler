@@ -21,31 +21,70 @@ export async function solve(model, preschedule, random_itr){
 
     const solved = solver.Solve(model)
 
-    const final_schedule = [], taken_ranges = [[], [], [], [], []], added_classes = [];
+    var final_schedule = [];
+    const added_classes = [], taken_ranges = [[], [], [], [], []];
+
     for (const [var_name, val] of Object.entries(solved)){
         const var_split = var_name.split("-");
-        if (var_split.length == 2){ //class result
+        if (var_split.length == 2){ //class result (xxxx 1234)
             const class_num = parseInt(var_split[0].substring(1)), offering_num = parseInt(var_split[1].substring(1));
             const add_class = preschedule[class_num].offerings[offering_num];
 
             add_class.title = preschedule[class_num].title;
             add_class.type = preschedule[class_num].type;
+
+            if (!solved.feasible){
+                /*//find list of all conflicting classes
+                for (let i = 0; i < add_class.meeting_times.length; i++){
+                    const mtime = add_class.meeting_times[i];
+                    for (let j = 0; j < taken_ranges[mtime.day].length; j++){
+                        const sched = taken_ranges[mtime.day][j];
+                        //console.log("tf0 = ["+ mtime.start_time + ", " + mtime.end_time + "], tf1 = " + JSON.stringify(sched.meeting_time));
+                        if (mtime.start_time < sched.meeting_time[1] && mtime.end_time > sched.meeting_time[0]){
+                            //adopted from utils.isRangeIntersection
+                            console.log("RANGE INTERSECTION: " + add_class.title + " (" + add_class.type + "), " + sched.title);
+                        }
+                    }
+                    //console.log("push " + add_class.title);
+                    taken_ranges[mtime.day].push({title: add_class.title, type: add_class.type, meeting_time: [mtime.start_time, mtime.end_time]});
+                }*/
+                return {feasible: false, classes: []} //TODO: Determine conflicting classes
+            }
             
-            let add = add_class.meeting_times.length == 0;
+            //let add = add_class.meeting_times.length == 0;
             for (let i = 0; i < add_class.meeting_times.length; i++){
-                const mtime = add_class.meeting_times[i];
-                if (solved.feasible || (!added_classes.includes(add_class.title + " " + add_class.type) && !isRangeIntersection([mtime.start_time, mtime.end_time], taken_ranges[mtime.day]))){
-                    add = true;
-                    taken_ranges[mtime.day].push([mtime.start_time, mtime.end_time]);
-                    added_classes.push(add_class.title + " " + add_class.type);
-                } else break;
+                //const mtime = add_class.meeting_times[i];
+                //if (solved.feasible || !added_classes.includes(add_class.title + " " + add_class.type)){
+                //add = true;
+                //taken_ranges[mtime.day].push([mtime.start_time, mtime.end_time]);
+                added_classes.push(add_class.title + " " + add_class.type);
+                //} 
             }
 
-            if (add) final_schedule.push(add_class);
+            //if (add) final_schedule.push(add_class);
+            final_schedule.push(add_class);
         }
     }
 
-    return {feasible: solved.feasible, classes: final_schedule}
+    /*const infeasible_classes = [], infeasible_classes_ret = [];
+    if (!solved.feasible){
+        for (let i = 0; i < preschedule.length; i++){
+            var found = false;
+            for (let j = 0; j < final_schedule.length; j++){
+                if (final_schedule[j].title == preschedule[i].title && final_schedule[j].type == preschedule[i].type){
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                infeasible_classes.push(preschedule[i].title);
+                infeasible_classes_ret.push(preschedule[i]); //for parsing later
+            }
+        }
+        //final_schedule = final_schedule.filter(cl => !infeasible_classes.includes(cl.title)); //remove other components of class such as REC, LAB
+    }*/
+
+    return {feasible: true, classes: final_schedule}
 }
 
 export default async function handler(req, res){
@@ -191,14 +230,20 @@ export default async function handler(req, res){
 
             var duplicate = false;
 
+            if (!solved.feasible){
+                res.status(200).json({conflictions: true, schedule_count: 0, schedules: []});
+                console.log("INFEASIBLE");
+                return;
+            }
+
             for (let j = 0; j < schedules.length; j++){
                 if (isSameSchedule(schedules[j], solved)) {
                     duplicate = true;
                     break;
                 }
             }
+
             if (!duplicate){
-                if (!solved.feasible) console.log("INFEASIBLE");
                 schedules.push(solved);
             }
             random_itr++;
@@ -210,7 +255,7 @@ export default async function handler(req, res){
         if (!premium) schedules.splice(2, schedules.length);
 
         //res.status(200).json({conflictions: solved.feasible ? 0 : min_enroll_count - solved.final_schedule.length, final_schedule: solved.final_schedule});
-        res.status(200).json({conflictions: 0, schedule_count: schedules.length, schedules});
+        res.status(200).json({conflictions: false, schedule_count: schedules.length, schedules});
 
     }
     catch(ex){
