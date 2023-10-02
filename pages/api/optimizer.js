@@ -34,20 +34,6 @@ export async function solve(model, preschedule, random_itr){
             add_class.type = preschedule[class_num].type;
 
             if (!solved.feasible){
-                /*//find list of all conflicting classes
-                for (let i = 0; i < add_class.meeting_times.length; i++){
-                    const mtime = add_class.meeting_times[i];
-                    for (let j = 0; j < taken_ranges[mtime.day].length; j++){
-                        const sched = taken_ranges[mtime.day][j];
-                        //console.log("tf0 = ["+ mtime.start_time + ", " + mtime.end_time + "], tf1 = " + JSON.stringify(sched.meeting_time));
-                        if (mtime.start_time < sched.meeting_time[1] && mtime.end_time > sched.meeting_time[0]){
-                            //adopted from utils.isRangeIntersection
-                            console.log("RANGE INTERSECTION: " + add_class.title + " (" + add_class.type + "), " + sched.title);
-                        }
-                    }
-                    //console.log("push " + add_class.title);
-                    taken_ranges[mtime.day].push({title: add_class.title, type: add_class.type, meeting_time: [mtime.start_time, mtime.end_time]});
-                }*/
                 return {feasible: false, classes: []} //TODO: Determine conflicting classes
             }
             
@@ -65,24 +51,6 @@ export async function solve(model, preschedule, random_itr){
             final_schedule.push(add_class);
         }
     }
-
-    /*const infeasible_classes = [], infeasible_classes_ret = [];
-    if (!solved.feasible){
-        for (let i = 0; i < preschedule.length; i++){
-            var found = false;
-            for (let j = 0; j < final_schedule.length; j++){
-                if (final_schedule[j].title == preschedule[i].title && final_schedule[j].type == preschedule[i].type){
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                infeasible_classes.push(preschedule[i].title);
-                infeasible_classes_ret.push(preschedule[i]); //for parsing later
-            }
-        }
-        //final_schedule = final_schedule.filter(cl => !infeasible_classes.includes(cl.title)); //remove other components of class such as REC, LAB
-    }*/
 
     return {feasible: true, classes: final_schedule}
 }
@@ -232,7 +200,6 @@ export default async function handler(req, res){
 
             if (!solved.feasible){
                 res.status(200).json({conflictions: true, schedule_count: 0, schedules: []});
-                console.log("INFEASIBLE");
                 return;
             }
 
