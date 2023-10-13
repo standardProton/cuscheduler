@@ -47,6 +47,8 @@ export default function Index({context}) {
     const [conflict_class, setConflictingClass] = useState(null);
 
     const [checklist_visible, setChecklistVisible] = useState(false);
+    const [donations_shown, setDonationsShown] = useState(false);
+    const [checklist_selected, setChecklistSelected] = useState([]);
 
     useEffect(() => {
         if (typeof window == "undefined") return;
@@ -304,6 +306,21 @@ export default function Index({context}) {
                             </div>
                         ))}
                     </div>)}
+                    {donations_shown && (<div style={{marginTop: "15px"}}>
+                        <Card style={{background: "#37373f", color: "#FFF", padding: "10px"}}>
+                            <div style={{fontSize: "11pt"}}>
+                                <div>
+                                    🎉This project was made by a CU Boulder student. If this tool was helpful to you, please donate to show your support!
+                                </div>
+                            </div>
+                            <div style={{display: "flex", justifyContent: "cener", alignItems: 'center', textAlign: 'center'}}>
+                                <Chip label="$5" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip>
+                                <Chip label="$7" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip>
+                                <Chip label="$10" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip>
+                                <Chip label="Custom" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip>
+                            </div>
+                        </Card>
+                    </div>)}
                     <div style={{marginTop: "15px"}}>
                         <Card style={{background: "#37373f"}}>
                             <CardContent>
@@ -353,7 +370,7 @@ export default function Index({context}) {
                     {loading && (<div style={{marginTop: "6px", marginRight: "10px"}}>
                         <Image src="/loading.gif" width="32" height="32" alt="Loading"></Image>
                     </div>)}
-                    <Button variant={(loading || schedule.classes.length == 0) ? "disabled" : "contained"} onClick={() => setChecklistVisible(true)} style={{backgroundColor: "#CFB87C"}}>SHOW CHECKLIST</Button>
+                    <Button variant={(loading || schedule.classes.length == 0) ? "disabled" : "contained"} onClick={() => {setChecklistVisible(true); setDonationsShown(true)}} style={{backgroundColor: "#CFB87C"}}>SHOW CHECKLIST</Button>
                     </>)}
                     
                     {false && (<center>
