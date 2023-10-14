@@ -50,7 +50,7 @@ export default function Index({context}) {
     const [donations_shown, setDonationsShown] = useState(false);
     const [checklist_selected, setChecklistSelected] = useState([]);
 
-    useEffect(() => {
+    useEffect(() => { //
         if (typeof window == "undefined") return;
 
         if (await_submit){
