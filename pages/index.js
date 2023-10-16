@@ -48,7 +48,7 @@ export default function Index({context}) {
 
     const [checklist_visible, setChecklistVisible] = useState(false);
     const [donations_shown, setDonationsShown] = useState(false);
-    const [checklist_selected, setChecklistSelected] = useState([]);
+    const [checklist_selected, setChecklistSelected] = useState(["ASTR 2030 001 (LEC)"]);
 
     useEffect(() => { //
         if (typeof window == "undefined") return;
@@ -314,10 +314,10 @@ export default function Index({context}) {
                                 </div>
                             </div>
                             <div style={{display: "flex", justifyContent: "cener", alignItems: 'center', textAlign: 'center'}}>
-                                <Chip label="$5" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip>
-                                <Chip label="$7" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip>
-                                <Chip label="$10" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip>
-                                <Chip label="Custom" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip>
+                                <a href="https://paypal.me/c7dev/5" target="_blank"><Chip label="$5" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip></a>
+                                <a href="https://paypal.me/c7dev/7" target="_blank"><Chip label="$7" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip></a>
+                                <a href="https://paypal.me/c7dev/10" target="_blank"><Chip label="$10" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip></a>
+                                <a href="https://paypal.me/c7dev" target="_blank"><Chip label="Custom" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip></a>
                             </div>
                         </Card>
                     </div>)}
@@ -370,7 +370,7 @@ export default function Index({context}) {
                     {loading && (<div style={{marginTop: "6px", marginRight: "10px"}}>
                         <Image src="/loading.gif" width="32" height="32" alt="Loading"></Image>
                     </div>)}
-                    <Button variant={(loading || schedule.classes.length == 0) ? "disabled" : "contained"} onClick={() => {setChecklistVisible(true); setDonationsShown(true)}} style={{backgroundColor: "#CFB87C"}}>SHOW CHECKLIST</Button>
+                    <Button variant={(loading || schedule.classes.length == 0) ? "disabled" : "contained"} onClick={() => setChecklistVisible(true)} style={{backgroundColor: "#CFB87C"}}>SHOW CHECKLIST</Button>
                     </>)}
                     
                     {false && (<center>
@@ -399,7 +399,7 @@ export default function Index({context}) {
                 </div>
             </div>
         </div>
-        <Popup setVisible={setChecklistVisible} visible={checklist_visible}>
+        <Popup setVisible={setChecklistVisible} onClose={() => setDonationsShown(true)} visible={checklist_visible}>
             <div className={styles.checklist_container}>
                 <div style={{marginBottom: "20px"}}>Registration Checklist:</div>
             {groupScheduleClasses(schedule.classes).map(checklist => (
@@ -408,7 +408,7 @@ export default function Index({context}) {
                     <div>
                         {checklist.sections.map(section => (
                             <FormControlLabel label={<Typography variant="label2">{"Section " + section}</Typography>} control = {
-                            <Checkbox size="medium" sx={{color: "white"}}></Checkbox>}></FormControlLabel>
+                            <Checkbox id={"checkbox-" + checklist.title + " " + section} size="medium" sx={{color: "white"}} defaultChecked={checklist_selected.includes(checklist.title + " " + section)}></Checkbox>}></FormControlLabel>
                         ))}
                     </div>
                 </div>
