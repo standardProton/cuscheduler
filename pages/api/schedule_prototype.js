@@ -2,6 +2,9 @@ import solver from "javascript-lp-solver/src/solver";
 
 
 export default async function handler(req, res){
+    res.status(200).json({status: "Disabled"});
+    return;
+    
     var model = {
         "optimize": ["cost", "proximity_y"], //cost can involve unpreferred hours, waitlist, bad professors, etc.
         "opType": "min",

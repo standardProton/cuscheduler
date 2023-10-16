@@ -16,17 +16,7 @@ import { Card, Checkbox, FormControlLabel, CardContent, MenuItem, CardActionArea
 import React from "react";
 import Popup from "../comps/Popup";
 
-export async function getServerSideProps(context){
-    return {
-        props: {
-            context: {
-                cors_anywhere: process.env.CORS_ANYWHERE,
-            }
-        }
-    }
-}
-
-export default function Index({context}) {
+export default function Index() {
 
     const [schedule_svg, setScheduleSVG] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -45,12 +35,14 @@ export default function Index({context}) {
     const [full_schedule_set, setFullScheduleSet] = useState([[]]);
     const [selected_schedule_index, setSelectedScheduleIndex] = useState(0);
     const [conflict_class, setConflictingClass] = useState(null);
-
     const [checklist_visible, setChecklistVisible] = useState(false);
     const [donations_shown, setDonationsShown] = useState(false);
-    const [checklist_selected, setChecklistSelected] = useState(["ASTR 2030 001 (LEC)"]);
 
-    useEffect(() => { //
+    //TODO
+    const [checklist_selected, setChecklistSelected] = useState([]); 
+    const [menu_shown, setMenuShown] = useState(true);
+
+    useEffect(() => {
         if (typeof window == "undefined") return;
 
         if (await_submit){
@@ -60,15 +52,17 @@ export default function Index({context}) {
 
         function update(){
             var width = window.innerWidth;
-            if (window.innerWidth > 650) { //update with phone threshold
-                const css_percentage = 0.23, css_min = 200, css_max = 350; //menu1 class
-                const percent = window.innerWidth*css_percentage;
-    
-                if (percent < css_min) width = window.innerWidth - css_min;
-                else if (percent > css_max) width = window.innerWidth - css_max;
-                else width = window.innerWidth*(1-css_percentage);
+            if (menu_shown){
+                if (window.innerWidth > 650) { //update with phone threshold
+                    const css_percentage = 0.23, css_min = 200, css_max = 350; //menu1 class
+                    const percent = window.innerWidth*css_percentage;
+        
+                    if (percent < css_min) width = window.innerWidth - css_min;
+                    else if (percent > css_max) width = window.innerWidth - css_max;
+                    else width = window.innerWidth*(1-css_percentage);
+                }
+                if (submitted) width -= 55;
             }
-            if (submitted) width -= 55;
 
             const options = {
                 ut_start: ut_create0,
@@ -130,14 +124,14 @@ export default function Index({context}) {
 
             setClassSuggestions(suggestions);
         }
-        search_box.addEventListener("input", searchBoxType);
+        if (search_box != null) search_box.addEventListener("input", searchBoxType);
 
         return () => {
             window.removeEventListener("resize", update);
-            search_box.removeEventListener("input", searchBoxType);
+            if (search_box != null) search_box.removeEventListener("input", searchBoxType);
         }
 
-    }, [schedule, preschedule, ut_create0, ut_create1, context, submitted]);
+    }, [schedule, preschedule, ut_create0, ut_create1, submitted]);
 
     useEffect(() => {
         if (ut_create1 != null && window.innerWidth < 750){
@@ -197,7 +191,7 @@ export default function Index({context}) {
         setLoading(true);
 
         //const preschedule_add = await getPreScheduleClass(class_code.toUpperCase(), context.cors_anywhere);
-        const preschedule_add_f = await fetch("/api/class_lookup?" + new URLSearchParams({name: class_code}));
+        const preschedule_add_f = await fetch("/api/class_data?" + new URLSearchParams({name: class_code}));
         const preschedule_add = await preschedule_add_f.json();
         if (preschedule_add != null) {
             if (preschedule_add.length == prescheduleClassCount(preschedule, class_code)) {
@@ -280,7 +274,6 @@ export default function Index({context}) {
                 setStatusText("❌ Impossible to fit this class!");
                 setSubmitted(false);
                 setSchedule({classes: [], avoid_times: schedule.avoid_times});
-                setConflictingClass(lastAddedClass);
                 if (lastAddedClass != null) setConflictingClass(lastAddedClass.toUpperCase());
             }
         } else {
@@ -297,7 +290,7 @@ export default function Index({context}) {
             <meta name="description" content="Cut down on stress and supercharge your sleep schedule with an optimized class schedule! Fit your courses around your work schedule and personal time."></meta>
         </Head>
         <div className={styles.main_container}>
-            <div className={styles.menu1}>
+            {menu_shown && (<div className={styles.menu1}>
                 <div className={styles.menu1_settings}>
                     <TextField fullWidth label="Enter your classes" sx={{input: {color: "white", background: "#37373f"}}} id="class-search"></TextField>
                     
@@ -316,10 +309,10 @@ export default function Index({context}) {
                                 </div>
                             </div>
                             <div style={{display: "flex", justifyContent: "cener", alignItems: 'center', textAlign: 'center'}}>
-                                <a href="https://paypal.me/c7dev/5" target="_blank"><Chip label="$5" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip></a>
-                                <a href="https://paypal.me/c7dev/7" target="_blank"><Chip label="$7" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip></a>
-                                <a href="https://paypal.me/c7dev/10" target="_blank"><Chip label="$10" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip></a>
-                                <a href="https://paypal.me/c7dev" target="_blank"><Chip label="Custom" variant="filled" className={styles.chip} style={{marginRight: "7px", cursor: "pointer"}}></Chip></a>
+                                <a href="https://paypal.me/c7dev/5" target="_blank"><Chip label="$5" variant="filled" sx={{bgcolor: "white", cursor: "pointer", marginRight: "7px"}}></Chip></a>
+                                <a href="https://paypal.me/c7dev/7" target="_blank"><Chip label="$7" variant="filled" sx={{bgcolor: "white", cursor: "pointer", marginRight: "7px"}}></Chip></a>
+                                <a href="https://paypal.me/c7dev/10" target="_blank"><Chip label="$10" variant="filled" sx={{bgcolor: "white", cursor: "pointer", marginRight: "7px"}}></Chip></a>
+                                <a href="https://paypal.me/c7dev" target="_blank"><Chip label="Custom" variant="filled" sx={{bgcolor: "white", cursor: "pointer", marginRight: "7px"}}></Chip></a>
                             </div>
                         </Card>
                     </div>)}
@@ -328,7 +321,7 @@ export default function Index({context}) {
                             <CardContent>
                                 <div style={{display: "flex", flexWrap: "wrap"}}>
                                 {preschedule.map((cl, i) => (
-                                    <Chip key={"class-chip-" + i} label={cl.title+ " " + cl.type} variant="filled" onDelete={() => removePrescheduleClass(cl)} className={styles.chip + ((conflict_class != null && conflict_class.toLowerCase() == cl.title.toLowerCase()) ? " " + styles.chip_red : "")}></Chip>
+                                    <Chip key={"class-chip-" + i} label={cl.title+ " " + cl.type} variant="filled" onDelete={() => removePrescheduleClass(cl)} sx={{bgcolor: (conflict_class != null && conflict_class.toLowerCase() == cl.title.toLowerCase()) ? "red" : "white", marginRight: "3px", marginBottom: "3px"}}></Chip>
                                 ))}
                                 {preschedule.length == 0 && (<div style={{paddingLeft: "5px"}}>
                                     <span style={{fontSize: "8pt", color: "rgba(255, 255, 255, 0.50)"}}>Search your classes to begin</span>
@@ -353,7 +346,7 @@ export default function Index({context}) {
                                                 ut_list[day].splice(i, 1);
                                                 setAwaitSubmit(true);
                                                 setSchedule({classes: schedule.classes, avoid_times: ut_list});
-                                            }} className={styles.chip}></Chip>
+                                            }} sx={{bgcolor: "white"}}></Chip>
                                         ))}
                                     </React.Fragment>
                                 ))}
@@ -384,7 +377,7 @@ export default function Index({context}) {
                         </div>)}
                     </center>)}
                 </div>
-            </div>
+            </div>)}
             <div className={styles.schedule_container}>
                 {submitted && (<div>
                     {full_schedule_set.map((schedule_set, i) => (
@@ -401,7 +394,7 @@ export default function Index({context}) {
                 </div>
             </div>
         </div>
-        <Popup setVisible={setChecklistVisible} onClose={() => setDonationsShown(true)} visible={checklist_visible}>
+        <Popup setVisible={setChecklistVisible} onClose={() => {if (schedule.classes.length >= 4) setDonationsShown(true)}} visible={checklist_visible}>
             <div className={styles.checklist_container}>
                 <div style={{marginBottom: "20px"}}>Registration Checklist:</div>
             {groupScheduleClasses(schedule.classes).map(checklist => (

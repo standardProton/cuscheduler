@@ -175,8 +175,15 @@
     margin-bottom: 30px;
 }
 
+.show_on_mobile{
+    display: none;
+}
+
 @media (max-width: 750px){
     .schedule_container{
         overflow-x: auto;
+    }
+    .show_on_mobile{
+        display: inline;
     }
 }
