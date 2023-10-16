@@ -196,7 +196,9 @@ export default function Index({context}) {
         setClassSuggestions([]);
         setLoading(true);
 
-        const preschedule_add = await getPreScheduleClass(class_code.toUpperCase(), context.cors_anywhere);
+        //const preschedule_add = await getPreScheduleClass(class_code.toUpperCase(), context.cors_anywhere);
+        const preschedule_add_f = await fetch("/api/class_lookup?" + new URLSearchParams({name: class_code}));
+        const preschedule_add = await preschedule_add_f.json();
         if (preschedule_add != null) {
             if (preschedule_add.length == prescheduleClassCount(preschedule, class_code)) {
                 setLoading(false);
