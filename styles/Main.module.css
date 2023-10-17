@@ -10,7 +10,7 @@
     width: 23%;
     max-width: 350px;
     background-color: #2c2c34;
-
+    position: relative;
 }
 .schedule_container{
     width: 81%;
@@ -181,6 +181,7 @@
 
 @media (max-width: 750px){
     .schedule_container{
+        width: 100vw;
         overflow-x: auto;
     }
     .show_on_mobile{

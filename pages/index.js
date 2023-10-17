@@ -37,10 +37,11 @@ export default function Index() {
     const [conflict_class, setConflictingClass] = useState(null);
     const [checklist_visible, setChecklistVisible] = useState(false);
     const [donations_shown, setDonationsShown] = useState(false);
+    const [menu_shown, setMenuShown] = useState(true);
+    const [show_menu_x, setShowMenuXButton] = useState(false);
 
     //TODO
     const [checklist_selected, setChecklistSelected] = useState([]); 
-    const [menu_shown, setMenuShown] = useState(true);
 
     useEffect(() => {
         if (typeof window == "undefined") return;
@@ -63,6 +64,8 @@ export default function Index() {
                 }
                 if (submitted) width -= 55;
             }
+
+            setShowMenuXButton(window.innerWidth <= 750);
 
             const options = {
                 ut_start: ut_create0,
@@ -290,7 +293,10 @@ export default function Index() {
             <meta name="description" content="Cut down on stress and supercharge your sleep schedule with an optimized class schedule! Fit your courses around your work schedule and personal time."></meta>
         </Head>
         <div className={styles.main_container}>
-            {menu_shown && (<div className={styles.menu1}>
+            {menu_shown && (<><div className={styles.menu1}>
+                {show_menu_x && (<div style={{position: "absolute", top: "10px", right: "-30px", cursor: "pointer"}} onClick={() => setMenuShown(false)}>
+                    <Image src="/icons/close.png" alt="Close Menu" width="21" height="21"></Image>
+                </div>)}
                 <div className={styles.menu1_settings}>
                     <TextField fullWidth label="Enter your classes" sx={{input: {color: "white", background: "#37373f"}}} id="class-search"></TextField>
                     
@@ -346,7 +352,7 @@ export default function Index() {
                                                 ut_list[day].splice(i, 1);
                                                 setAwaitSubmit(true);
                                                 setSchedule({classes: schedule.classes, avoid_times: ut_list});
-                                            }} sx={{bgcolor: "white"}}></Chip>
+                                            }} sx={{bgcolor: "white", marginBottom: "3px"}}></Chip>
                                         ))}
                                     </React.Fragment>
                                 ))}
@@ -356,7 +362,7 @@ export default function Index() {
 
                 </div>
                 <div className={styles.menu1_submit}>
-                    {true && (<><div style={{position: "absolute", top: "-30px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
+                    <div style={{position: "absolute", top: "-30px", fontSize: "12pt", width: "calc(100% - 20px)"}}>
                         <center>
                             <span><b>{status_message}</b></span>
                         </center>
@@ -366,7 +372,7 @@ export default function Index() {
                         <Image src="/loading.gif" width="32" height="32" alt="Loading"></Image>
                     </div>)}
                     <Button variant={(loading || schedule.classes.length == 0) ? "disabled" : "contained"} onClick={() => setChecklistVisible(true)} style={{backgroundColor: "#CFB87C"}}>SHOW CHECKLIST</Button>
-                    </>)}
+                    
                     
                     {false && (<center>
                         {loading ? (<div style={{marginTop: "6px", marginRight: "10px"}}>
@@ -377,7 +383,8 @@ export default function Index() {
                         </div>)}
                     </center>)}
                 </div>
-            </div>)}
+            </div>
+            </>)}
             <div className={styles.schedule_container}>
                 {submitted && (<div>
                     {full_schedule_set.map((schedule_set, i) => (
@@ -410,6 +417,9 @@ export default function Index() {
             ))}
             </div>
         </Popup>
+        {!menu_shown && (<div style={{position: "fixed", left: "10px", top: "10px", cursor: "pointer"}} onClick={() => setMenuShown(true)}>
+            <Image src="/icons/menu.png" alt="Show menu" width="25" height="25"></Image>
+        </div>)}
         </>
     );
 }
