@@ -404,13 +404,22 @@ export default function Index() {
         <Popup setVisible={setChecklistVisible} onClose={() => {if (schedule.classes.length >= 4) setDonationsShown(true)}} visible={checklist_visible}>
             <div className={styles.checklist_container}>
                 <div style={{marginBottom: "20px"}}>Registration Checklist:</div>
-            {groupScheduleClasses(schedule.classes).map(checklist => (
-                <div className={styles.checklist_element}>
+            {groupScheduleClasses(schedule.classes).map((checklist, i) => (
+                <div className={styles.checklist_element} key={"checklist-group-" + i}>
                     <span style={{fontSize: "18pt"}}><b>{checklist.title}</b></span>
                     <div>
                         {checklist.sections.map(section => (
                             <FormControlLabel label={<Typography variant="label2">{"Section " + section}</Typography>} control = {
-                            <Checkbox id={"checkbox-" + checklist.title + " " + section} size="medium" sx={{color: "white"}} defaultChecked={checklist_selected.includes(checklist.title + " " + section)}></Checkbox>}></FormControlLabel>
+                            <Checkbox id={"checkbox-" + checklist.title + " " + section} size="medium" sx={{color: "white"}} defaultChecked={checklist_selected.includes(checklist.title + " " + section)} 
+                            onChange={() => {
+                                if (checklist_selected.includes(checklist.title + " " + section)){
+                                    setChecklistSelected(checklist_selected.filter(el => el != (checklist.title + " " + section)));
+                                    return;
+                                } else {
+                                    checklist_selected.push(checklist.title + " " + section);
+                                }
+                                setChecklistSelected([...checklist_selected]);
+                            }}></Checkbox>}></FormControlLabel>
                         ))}
                     </div>
                 </div>
