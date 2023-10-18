@@ -3,6 +3,7 @@
 .main_container{
     display: flex;
     flex-wrap: nowrap;
+    background-color: #1b1b22;
 }
 
 .menu1{
