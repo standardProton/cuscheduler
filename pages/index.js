@@ -47,8 +47,6 @@ export default function Index({analytics}) {
     const [donations_shown, setDonationsShown] = useState(false);
     const [menu_shown, setMenuShown] = useState(true);
     const [show_menu_x, setShowMenuXButton] = useState(false);
-
-    //TODO
     const [checklist_selected, setChecklistSelected] = useState([]); 
 
     useEffect(() => {
@@ -310,7 +308,7 @@ export default function Index({analytics}) {
         </Head>
         <div className={styles.main_container}>
             {menu_shown && (<><div className={styles.menu1}>
-                {show_menu_x && (<div style={{position: "absolute", top: "10px", right: "-30px", cursor: "pointer"}} onClick={() => setMenuShown(false)}>
+                {show_menu_x && (<div style={{position: "absolute", top: "10px", right: "-30px", cursor: "pointer"}} onClick={() => {setMenuShown(false); setUTCreatorStart(null); setUTCreatorEnd(null)}}>
                     <Image src="/icons/close.png" alt="Close Menu" width="21" height="21"></Image>
                 </div>)}
                 <div className={styles.menu1_settings}>
@@ -442,7 +440,7 @@ export default function Index({analytics}) {
             ))}
             </div>
         </Popup>
-        {!menu_shown && (<div style={{position: "fixed", left: "10px", top: "10px", cursor: "pointer"}} onClick={() => setMenuShown(true)}>
+        {!menu_shown && (<div style={{position: "fixed", left: "10px", top: "10px", cursor: "pointer"}} onClick={() => {setMenuShown(true); setUTCreatorEnd(null); setUTCreatorStart(null)}}>
             <Image src="/icons/menu.png" alt="Show menu" width="25" height="25"></Image>
         </div>)}
         </>
