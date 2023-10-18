@@ -16,7 +16,15 @@ import { Card, Checkbox, FormControlLabel, CardContent, MenuItem, CardActionArea
 import React from "react";
 import Popup from "../comps/Popup";
 
-export default function Index() {
+export function getServerSideProps(context){
+    return {
+        props: {
+            analytics: !process.env.DEV_ENV
+        }
+    }
+}
+
+export default function Index({analytics}) {
 
     const [schedule_svg, setScheduleSVG] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -291,6 +299,14 @@ export default function Index() {
             <link rel="icon" href="/favicon.png"></link>
             <title>#1 CU Boulder Schedule Builder | Make Your Schedule Perfect in only 60 Seconds</title>
             <meta name="description" content="Cut down on stress and supercharge your sleep schedule with an optimized class schedule! Fit your courses around your work schedule and personal time."></meta>
+            {analytics && (
+                <>
+                <script async src="https://www.googletagmanager.com/gtag/js?id=G-N7V5MK9YDW"></script>
+                <script>
+                  {"window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}; gtag('js', new Date()); gtag('config', 'G-N7V5MK9YDW');"}
+                </script>
+                </>
+            )}
         </Head>
         <div className={styles.main_container}>
             {menu_shown && (<><div className={styles.menu1}>
