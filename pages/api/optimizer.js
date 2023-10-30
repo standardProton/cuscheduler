@@ -8,7 +8,7 @@ export function randomCost(i){ //basic seeded pseudorandom function
     return n - Math.trunc(n);
 }
 
-export async function solve(model, preschedule, random_itr){
+export async function solve(model, preschedule, random_itr){ //run model and parse results
 
     //add random noise to costs
     let random_itr2 = 0;
@@ -22,32 +22,26 @@ export async function solve(model, preschedule, random_itr){
     const solved = solver.Solve(model)
 
     var final_schedule = [];
-    const added_classes = [], taken_ranges = [[], [], [], [], []];
+    const added_classes = [];
 
     for (const [var_name, val] of Object.entries(solved)){
         const var_split = var_name.split("-");
         if (var_split.length == 2){ //class result (xxxx 1234)
             const class_num = parseInt(var_split[0].substring(1)), offering_num = parseInt(var_split[1].substring(1));
-            const add_class = preschedule[class_num].offerings[offering_num];
+            const add_class = preschedule[class_num].offerings[offering_num]; //parse results from model and get class data
 
             add_class.title = preschedule[class_num].title;
             add_class.type = preschedule[class_num].type;
 
             if (!solved.feasible){
-                return {feasible: false, classes: []} //TODO: Determine conflicting classes
+                return {feasible: false, classes: []} //TODO: Determine which class is conflicting
+                //classes is empty because model will return erraneous results
             }
             
-            //let add = add_class.meeting_times.length == 0;
             for (let i = 0; i < add_class.meeting_times.length; i++){
-                //const mtime = add_class.meeting_times[i];
-                //if (solved.feasible || !added_classes.includes(add_class.title + " " + add_class.type)){
-                //add = true;
-                //taken_ranges[mtime.day].push([mtime.start_time, mtime.end_time]);
                 added_classes.push(add_class.title + " " + add_class.type);
-                //} 
             }
 
-            //if (add) final_schedule.push(add_class);
             final_schedule.push(add_class);
         }
     }
@@ -101,10 +95,8 @@ export default async function handler(req, res){
             return;
         }
 
-        const premium = true;
-
         const min_enroll_count = data.min_enroll_count == undefined ? preschedule.length : Math.min(data.min_enroll_count, preschedule.length);
-        const model = {
+        const model = { //initial model and constraints
             optimize: "cost",
             opType: "min",
             constraints: {
@@ -114,7 +106,7 @@ export default async function handler(req, res){
             ints: {}
         }
 
-        //preprocess preschedule data
+        //preprocess preschedule data, determine if using semesters or quarters
         let quarters = null; //null if all classes fit whole semester, otherwise max # of quarters
         for (let i = 0; i < preschedule.length; i++){
             if (preschedule[i].title == undefined || preschedule[i].offerings == undefined || preschedule[i].offerings.length == 0){
@@ -132,7 +124,6 @@ export default async function handler(req, res){
             }
         }
 
-        let cost_count = 0;
         for (let i = 0; i < preschedule.length; i++){ //each class to be scheduled
 
             const title = preschedule[i].title.toUpperCase();
@@ -141,11 +132,10 @@ export default async function handler(req, res){
 
             for (let j = 0; j < Math.min(preschedule[i].offerings.length, 65); j++){ //each offering in class
                 const offering = preschedule[i].offerings[j];
-                const model_var = {enrolled_count: 1, cost: 0, cost_orig: 0}
-                cost_count++;
+                const model_var = {enrolled_count: 1, cost: 0, cost_orig: 0} //boolean cost
                 model_var["c" + i + "-enrolled"] = 1;
 
-                if (offering.full && premium) model_var.cost_orig += 10;
+                if (offering.full) model_var.cost_orig += 10; //avoid waitlist
 
                 if (offering.meeting_times == undefined){ //if len 0, class is async
                     res.status(406).json({error_msg: "Class '" + title + "' offering #" + j + " does not define 'meeting_times'!"});
@@ -160,10 +150,10 @@ export default async function handler(req, res){
                         return;
                     }
 
-                    if (isRangeIntersection([mtime.start_time, mtime.end_time], avoid_times[mtime.day])) ut_count++;
+                    if (isRangeIntersection([mtime.start_time, mtime.end_time], avoid_times[mtime.day])) ut_count++; //if class is in unavailable times
                     
                     for (let time_itr = mtime.start_time; time_itr <= mtime.end_time + 1; time_itr++){ //every 5 min chunk in 1 class's meeting
-                        if (offering.quarter != null){ //quarterly class
+                        if (offering.quarter != null){ //if quarterly class
                             model_var["d" + mtime.day + "-t" + time_itr + "-q" + offering.quarter] = 1; //model time (0-MAX_MODEL_TIME), also books 5 mins after class ends
                             model.constraints["d" + mtime.day + "-t" + time_itr + "-q" + offering.quarter] = {min: 0, max: 1};
                         } else {
@@ -171,7 +161,7 @@ export default async function handler(req, res){
                                 model_var["d" + mtime.day + "-t" + time_itr] = 1; 
                                 model.constraints["d" + mtime.day + "-t" + time_itr] = {min: 0, max: 1};
                             } else {
-                                for (let qi = 0; qi <= quarters; qi++){ //not a quarterly class, takes all quarters in semester
+                                for (let qi = 0; qi <= quarters; qi++){ //not a quarterly class, but takes all quarters in semester
                                     model_var["d" + mtime.day + "-t" + time_itr + "-q" + qi] = 1; 
                                     model.constraints["d" + mtime.day + "-t" + time_itr + "-q" + qi] = {min: 0, max: 1};
                                 }
@@ -187,13 +177,12 @@ export default async function handler(req, res){
             }
         }
 
-        
         //console.log(model.variables);
 
         const schedules = [], start = (new Date()).getTime();
 
         var random_itr = 0;
-        while (schedules.length < 10 && random_itr < (premium ? 30 : 20)){
+        while (schedules.length < 10 && random_itr < 30){ //make up to 10 variations by adding small bit of randomness to costs
             const solved = await solve(model, preschedule, random_itr);
 
             var duplicate = false;
@@ -216,10 +205,7 @@ export default async function handler(req, res){
             random_itr++;
         }
 
-        console.log("Took " + ((new Date()).getTime() - start) + "ms");
-
-        const possible_length = schedules.length;
-        if (!premium) schedules.splice(2, schedules.length);
+        //console.log("Took " + ((new Date()).getTime() - start) + "ms");
 
         //res.status(200).json({conflictions: solved.feasible ? 0 : min_enroll_count - solved.final_schedule.length, final_schedule: solved.final_schedule});
         res.status(200).json({conflictions: false, schedule_count: schedules.length, schedules});

@@ -57,7 +57,7 @@ export default function Index({analytics}) {
             setAwaitSubmit(false);
         }
 
-        function update(){
+        function update(){ //refresh schedule states and fit to screen size
             var width = window.innerWidth;
             if (menu_shown){
                 if (window.innerWidth > 650) { //update with phone threshold
@@ -96,7 +96,7 @@ export default function Index({analytics}) {
         }
 
         const search_box = document.getElementById("class-search");
-        const searchBoxType = (e) => {
+        const searchBoxType = (e) => { //search & show class name suggestions
             const t = e.target.value;
             const suggestions = [];
             if (t.length == 0) {
@@ -117,14 +117,15 @@ export default function Index({analytics}) {
                     if (res != undefined) {
                         for (let j = 0; j < res.length; j++) {
                             var add = true;
-                                if (!suggestions.includes(res[j])){
-                                for (let k = 0; k < word_split.length; k++){
-                                    if (i != k && !name_map[res[j]].toLowerCase().includes(word_split[k].toLowerCase())) {
-                                        add = false;
-                                        break;
-                                    }
+                            //intersect the results for each word in search
+                            if (!suggestions.includes(res[j])){
+                            for (let k = 0; k < word_split.length; k++){
+                                if (i != k && !name_map[res[j]].toLowerCase().includes(word_split[k].toLowerCase())) {
+                                    add = false;
+                                    break;
                                 }
-                                if (add) suggestions.push(res[j]);
+                            }
+                            if (add) suggestions.push(res[j]);
                             }
                         }
                     }
@@ -150,8 +151,9 @@ export default function Index({analytics}) {
 
     function scheduleClick(day, time, is_upclick){
         if (ut_create0 == null && (!is_upclick || window.innerWidth < 750) && UTCount(schedule.avoid_times) < 20){
+            //set first unavailable time point on schedule
             setUTCreatorStart([day, time]);
-        } else if (ut_create1 != null) {
+        } else if (ut_create1 != null) { //set 2nd ut point
             const avoid_times = schedule.avoid_times;
             for (let i = Math.min(ut_create0[0], ut_create1[0]); i <= Math.max(ut_create0[0], ut_create1[0]); i++){
                 var add_new = true;
@@ -162,7 +164,7 @@ export default function Index({analytics}) {
                 const remove_indexes = []; //TODO
                 for (let j = 0; j < avoid_times[i].length; j++){
                     const existing_ut = avoid_times[i][j];
-                    if (isRangeIntersectionSingle(new_ut, existing_ut)){
+                    if (isRangeIntersectionSingle(new_ut, existing_ut)){ //handle trivial overlapping ranges
                         if (new_ut[0] < existing_ut[0]) {
                             existing_ut[0] = new_ut[0];
                             add_new = false;
@@ -200,7 +202,7 @@ export default function Index({analytics}) {
         setLoading(true);
 
         //const preschedule_add = await getPreScheduleClass(class_code.toUpperCase(), context.cors_anywhere);
-        const preschedule_add_f = await fetch("/api/class_data?" + new URLSearchParams({name: class_code}));
+        const preschedule_add_f = await fetch("/api/class_data?" + new URLSearchParams({name: class_code})); //fetch data from api
         const preschedule_add = await preschedule_add_f.json();
         if (preschedule_add != null) {
             if (preschedule_add.length == prescheduleClassCount(preschedule, class_code)) {
@@ -242,7 +244,7 @@ export default function Index({analytics}) {
         setPreSchedule(nps);
     }
 
-    async function submit(lastAddedClass){
+    async function submit(lastAddedClass){ //send preschedule to optimizer
         if (loading) return;
         if (preschedule == null || preschedule.length == 0) {
             setSchedule({classes: [], avoid_times: schedule.avoid_times});
