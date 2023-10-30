@@ -77,6 +77,7 @@ export default function Index({analytics}) {
                 ut_start: ut_create0,
                 ut_end: ut_create1,
                 scheduleClickUp: (x, y) => scheduleClick(x, y, true),
+                removeUT
             }
     
             setScheduleSVG(renderScheduleSVG(width, window.innerHeight-4, schedule, color_key, setColorKey, scheduleClick, scheduleHover, options));
@@ -191,6 +192,15 @@ export default function Index({analytics}) {
         if (ut_create0 != null){
             setUTCreatorEnd([day, time]);
         }
+    }
+
+    function removeUT(day, index){
+        const ut_list = schedule.avoid_times;
+        ut_list[day].splice(index, 1);
+        setAwaitSubmit(true);
+        setUTCreatorStart(null);
+        setUTCreatorEnd(null);
+        setSchedule({classes: schedule.classes, avoid_times: ut_list});
     }
 
     async function addPrescheduleClass(class_code){
@@ -364,10 +374,7 @@ export default function Index({analytics}) {
                                     <React.Fragment key={"ut-chip-day-" + day}>
                                         {ut_set.map((ut, i) => (
                                             <Chip label={timeString(day, ut[0], ut[1])} key={"ut-chip-" + i} variant="filled" onDelete={()=> {
-                                                const ut_list = schedule.avoid_times;
-                                                ut_list[day].splice(i, 1);
-                                                setAwaitSubmit(true);
-                                                setSchedule({classes: schedule.classes, avoid_times: ut_list});
+                                                removeUT(day, i);
                                             }} sx={{bgcolor: "white", marginBottom: "3px"}}></Chip>
                                         ))}
                                     </React.Fragment>
